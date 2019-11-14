@@ -2,5 +2,4 @@
 
 This project is a team project for **system programming**(the second semester of 2019) lectures by the Department of Computer Science at Kyungpook National University.
 
-* Team members
-Dohee Kim, Juyoung Kim, Hyewon Baek
+* Team member : *Dohee Kim, Juyoung Kim, Hyewon Baek*
