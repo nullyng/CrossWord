@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <curses.h>
+#include <ncurses.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <signal.h>
@@ -13,9 +13,9 @@ void set_nodelay_mode(void);
 void tty_mode(int);
 
 void main(){
-	char m_start[] = "[1] GAME START";
-	char m_info[] = "[2] GAME INFO";
-	char m_exit[] = "[3] GAME EXIT";
+//	char m_start[] = "[1] GAME START";
+//	char m_info[] = "[2] GAME INFO";
+//	char m_exit[] = "[3] GAME EXIT";
 
 	tty_mode(0); // save original mode
 //	set_crmode(); // canonical mode OFF
@@ -23,15 +23,25 @@ void main(){
 
 	initscr();
 	clear();
-
+	
 	attron(A_BOLD);
-	move(10, 10);
-	addstr(m_start);
-	move(11, 10);
-	addstr(m_info);
-	move(12, 10);
-	addstr(m_exit);
-	move(LINES-1, COLS-1);
+
+	move(5,5);
+	printw(" __________________________________________________________________________");
+	move(6,5);
+	printw("|1   |2   |3   |    |4   |5   |6   |    |7   |8   |9   |    |10  |11  |12  |");
+	move(7,5);
+	printw("|    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |");
+	move(8,5);
+	printw(" __________________________________________________________________________");
+
+//	move(10, 10);
+//	addstr(m_start);
+//	move(11, 10);
+//	addstr(m_info);
+//	move(12, 10);
+//	addstr(m_exit);
+//	move(LINES-1, COLS-1);
 	refresh();
 
 	if(getchar() == 'q'){
