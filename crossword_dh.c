@@ -14,19 +14,18 @@ void set_nodelay_mode(void);
 void tty_mode(int);
 
 void main(){
-//	char m_start[] = "[1] GAME START";
-//	char m_info[] = "[2] GAME INFO";
-//	char m_exit[] = "[3] GAME EXIT";
+	//	char m_start[] = "[1] GAME START";
+	//	char m_info[] = "[2] GAME INFO";
+	//	char m_exit[] = "[3] GAME EXIT";
 
 	tty_mode(0); // save original mode
-//	set_crmode(); // canonical mode OFF
-//	set_nodelay_mode(); // nonblocking ON
+	//	set_crmode(); // canonical mode OFF
+	//	set_nodelay_mode(); // nonblocking ON
 
 	initscr();
 	clear();
-	
-	attron(A_BOLD);
-//                               6    11   16   21   26   31   36   41   46
+
+	//                               6    11   16   21   26   31   36   41   46
 	move(3,5);	printw("*--------------------------------------------*");
 	move(4,5);	printw("|1   |    |2   |    |3   |    |4   |    |5   |"); add_blank(4,31,1);
 	move(5,5);	printw("|    |    |    |    |    |    |    |    |    |"); add_blank(5,31,1);
@@ -56,7 +55,9 @@ void main(){
 	move(29,5);	printw("|    |    |    |    |    |    |    |    |    |"); add_blank(29,21,1);
 	move(30,5);	printw("*--------------------------------------------*");
 
+	attron(A_BOLD|A_UNDERLINE);
 	move(3,56);	printw("Across");
+	attroff(A_BOLD|A_UNDERLINE);
 	move(5,56);	printw("1. Cook on gridiron");
 	move(6,56);	printw("4. Work with shovel");
 	move(7,56);	printw("6. Belonging to us");
@@ -70,7 +71,9 @@ void main(){
 	move(15,56);	printw("18. Sticky black substance");
 	move(16,56);	printw("19. A lollipop");
 
+	attron(A_BOLD|A_UNDERLINE);
 	move(3,87);	printw("Down");
+	attroff(A_BOLD|A_UNDERLINE);
 	move(5,87);	printw("1. Protect");
 	move(6,87);	printw("2. Northern lreland army");
 	move(7,87);	printw("3. Not short");
@@ -82,14 +85,28 @@ void main(){
 	move(13,87);	printw("14. Feline");
 	move(14,87);	printw("16. Sick");
 
+	attron(A_BOLD);
+	move(19,56);	printw("*************************************************************");
+	move(20,56);	printw("*                                                           *");
+	move(21,56);	printw("*                                                           *");
+	move(22,56);	printw("*                                                           *");
+	move(23,56);	printw("*                                                           *");
+	move(24,56);	printw("*                                                           *");
+	move(25,56);	printw("*                                                           *");
+	move(26,56);	printw("*                                                           *");
+	move(27,56);	printw("*                                                           *");
+	move(28,56);	printw("*                                                           *");
+	move(29,56);	printw("*                                                           *");
+	move(30,56);	printw("*************************************************************");
+	attroff(A_BOLD);
 
-//	move(10, 10);
-//	addstr(m_start);
-//	move(11, 10);
-//	addstr(m_info);
-//	move(12, 10);
-//	addstr(m_exit);
-//	move(LINES-1, COLS-1);
+	//	move(10, 10);
+	//	addstr(m_start);
+	//	move(11, 10);
+	//	addstr(m_info);
+	//	move(12, 10);
+	//	addstr(m_exit);
+	//	move(LINES-1, COLS-1);
 	refresh();
 
 	if(getchar() == 'q'){
