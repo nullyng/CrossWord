@@ -236,7 +236,7 @@ void add(){
 
 		move(20,58); printw("%s", input);
 
-		number = atoi(input[0]); /////////////////여기서 터짐!!!!!!!!!!
+		number = atoi(&(input[0])); /////////////////여기서 터짐!!!!!!!!!!
 
 		if(selection == 1){ // Across
 			if(strcmp(across[number], input+2) == 0){
