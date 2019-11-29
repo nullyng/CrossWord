@@ -7,16 +7,20 @@
 #include <termio.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <string.h>
 
 void add_blank(int, int, int);
 void select_action();
+void clear_box();
+void add();
+void delete();
+void submit();
+void exit_puzzle();
 void set_crmode();
 void set_nodelay_mode(void);
 void tty_mode(int);
 
 void main(){
-
-
 	tty_mode(0); // save original mode
 	set_crmode(); // canonical mode OFF
 	//	set_nodelay_mode(); // blocking OFF
@@ -104,7 +108,7 @@ void main(){
 	move(LINES-1, COLS-1);
 	refresh();
 
-	if(getchar() == 'q'){
+	if(getchar()){
 		tty_mode(1);
 		endwin();
 		return;
@@ -141,8 +145,10 @@ void select_action(){
 				attron(A_REVERSE);
 			printw("%s", selections[i]);
 			attroff(A_REVERSE);
+			move(LINES-1, COLS-1);
+			refresh();
 		}
-		
+
 		switch(key = getch()){
 			case KEY_DOWN:
 				if(++selection == 5) selection = 4;
@@ -156,36 +162,137 @@ void select_action(){
 		if(key == 10)
 			break;
 	}
-	//돼라 제발
+
+	if(selection == 1) add();
+	else if(selection == 2) delete();
+	else if(selection == 3) submit();
+	else exit_puzzle();
+}
+
+void clear_box(){
+	char blank[] = "                                                           ";
+	for(int i = 20; i <= 29; i++){
+		move(i,57);
+		addstr(blank);
+	}
+	refresh();
 }
 
 
-	void set_crmode(){ // canonical mode OFF
-		struct termios ttystate;
+void add(){
+	int key;
+	int selection = 1; // 1:Across, 2:Down
+	char *selections[] = {"[1] Across", "[2] Down"};
+	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
+	char *down[] = {"guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
+	char input[20];
+	int number; // Across, Down의 몇 번째 단어인가?
 
-		tcgetattr(0, &ttystate);
-		ttystate.c_lflag &= ~ICANON;
-		ttystate.c_cc[VMIN] = 1;
-		tcsetattr(0, TCSANOW, &ttystate);
-	}
+	clear_box();	
 
-	void set_nodelay_mode(){ // nonblocking mode
-		int termflags;
-		termflags = fcntl(0, F_GETFL);
-		termflags |= O_NDELAY;
-		fcntl(0, F_SETFL, termflags);
-	}
-
-	void tty_mode(int how){ // restore original mode
-		static struct termios original_mode;
-		static int original_flags;
-
-		if(how == 0){
-			tcgetattr(0, &original_mode);
-			original_flags = fcntl(0, F_GETFL);
+	keypad(stdscr, TRUE);
+	while(1){
+		for(int i = 0; i < 2; i++){
+			move(24+i,80);
+			if(i + 1 == selection)
+				attron(A_REVERSE);
+			printw("%s", selections[i]);
+			attroff(A_REVERSE);
+			move(LINES-1, COLS-1);
+			refresh();
 		}
-		else{
-			tcsetattr(0, TCSANOW, &original_mode);
-			original_flags = fcntl(0, F_SETFL, original_flags);
+
+		switch(key = getch()){
+			case KEY_DOWN:
+				if(++selection == 3) selection = 2;
+				break;
+			case KEY_UP:
+				if(--selection == 0) selection = 1;
+				break;
+			default:
+				break;
+		}
+		if(key == 10)
+			break;
+	}
+
+	while(1){
+		clear_box();
+		move(20,58); printw("Please write the answer. (example: 20 table)");
+		move(21,58); printw(": ");
+		refresh();
+		getstr(input); // get the input
+		number = input[0];
+
+		if(selection == 1){ // Across
+			if(strcmp(across[number], input+2) == 0){
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
+			else{
+				clear_box();
+				move(20,58); printw("Wrong answer. Try again!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
+		}
+
+		else{ // Down
+			if(strcmp(across[number], input+2) == 0){
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
+			else{
+				clear_box();
+				move(20,58); printw("Wrong answer. Try again!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
 		}
 	}
+}
+
+void delete(){
+}
+void submit(){
+}
+void exit_puzzle(){
+}
+
+void set_crmode(){ // canonical mode OFF
+	struct termios ttystate;
+
+	tcgetattr(0, &ttystate);
+	ttystate.c_lflag &= ~ICANON;
+	ttystate.c_cc[VMIN] = 1;
+	tcsetattr(0, TCSANOW, &ttystate);
+}
+
+void set_nodelay_mode(){ // nonblocking mode
+	int termflags;
+	termflags = fcntl(0, F_GETFL);
+	termflags |= O_NDELAY;
+	fcntl(0, F_SETFL, termflags);
+}
+
+void tty_mode(int how){ // restore original mode
+	static struct termios original_mode;
+	static int original_flags;
+
+	if(how == 0){
+		tcgetattr(0, &original_mode);
+		original_flags = fcntl(0, F_GETFL);
+	}
+	else{
+		tcsetattr(0, TCSANOW, &original_mode);
+		original_flags = fcntl(0, F_SETFL, original_flags);
+	}
+}
