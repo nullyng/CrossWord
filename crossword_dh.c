@@ -56,7 +56,31 @@ void main(){
 	move(29,5);	printw("|    |    |    |    |    |    |    |    |    |"); add_blank(29,21,1);
 	move(30,5);	printw("*--------------------------------------------*");
 
+	move(3,56);	printw("Across");
+	move(5,56);	printw("1. Cook on gridiron");
+	move(6,56);	printw("4. Work with shovel");
+	move(7,56);	printw("6. Belonging to us");
+	move(8,56);	printw("7. Repeated another time");
+	move(9,56);	printw("8. Small insect");
+	move(10,56);	printw("9. 10cent coin");
+	move(11,56);	printw("11. Frozen precipitation");
+	move(12,56);	printw("14. Food tin");
+	move(13,56);	printw("15. Grayish green");
+	move(14,56);	printw("17. Hooting bird");
+	move(15,56);	printw("18. Sticky black substance");
+	move(16,56);	printw("19. A lollipop");
 
+	move(3,87);	printw("Down");
+	move(5,87);	printw("1. Protect");
+	move(6,87);	printw("2. Northern lreland army");
+	move(7,87);	printw("3. Not short");
+	move(8,87);	printw("4. Empty liquid from container");
+	move(9,87);	printw("5. Acquire");
+	move(10,87);	printw("10. Not major");
+	move(11,87);	printw("12. Fully of weeds");
+	move(12,87);	printw("13. Tootsie ____");
+	move(13,87);	printw("14. Feline");
+	move(14,87);	printw("16. Sick");
 
 
 //	move(10, 10);
