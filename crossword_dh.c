@@ -132,6 +132,8 @@ void select_action(){
 		"[2] Delete",
 		"[3] Submit",
 		"[4] Exit"};
+
+	keypad(stdscr, TRUE);
 	while(1){
 		for(int i = 0; i < 4; i++){
 			move(23+i,80);
