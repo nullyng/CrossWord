@@ -222,7 +222,7 @@ void add(){
 		move(21,58); printw(": ");
 		refresh();
 		getstr(input); // get the input
-		number = input[0];
+		number = atoi(input[0]);
 
 		if(selection == 1){ // Across
 			if(strcmp(across[number], input+2) == 0){
