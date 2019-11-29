@@ -9,18 +9,17 @@
 #include <ctype.h>
 
 void add_blank(int, int, int);
+void select_action();
 void set_crmode();
 void set_nodelay_mode(void);
 void tty_mode(int);
 
 void main(){
-	//	char m_start[] = "[1] GAME START";
-	//	char m_info[] = "[2] GAME INFO";
-	//	char m_exit[] = "[3] GAME EXIT";
+
 
 	tty_mode(0); // save original mode
-	//	set_crmode(); // canonical mode OFF
-	//	set_nodelay_mode(); // nonblocking ON
+	set_crmode(); // canonical mode OFF
+	//	set_nodelay_mode(); // blocking OFF
 
 	initscr();
 	clear();
@@ -100,13 +99,9 @@ void main(){
 	move(30,56);	printw("*************************************************************");
 	attroff(A_BOLD);
 
-	//	move(10, 10);
-	//	addstr(m_start);
-	//	move(11, 10);
-	//	addstr(m_info);
-	//	move(12, 10);
-	//	addstr(m_exit);
-	//	move(LINES-1, COLS-1);
+	select_action();
+
+	move(LINES-1, COLS-1);
 	refresh();
 
 	if(getchar() == 'q'){
@@ -130,33 +125,65 @@ void add_blank(int x, int y, int n){
 	standend();
 }
 
-
-void set_crmode(){ // canonical mode OFF
-	struct termios ttystate;
-
-	tcgetattr(0, &ttystate);
-	ttystate.c_lflag &= ~ICANON;
-	ttystate.c_cc[VMIN] = 1;
-	tcsetattr(0, TCSANOW, &ttystate);
-}
-
-void set_nodelay_mode(){ // nonblocking mode
-	int termflags;
-	termflags = fcntl(0, F_GETFL);
-	termflags |= O_NDELAY;
-	fcntl(0, F_SETFL, termflags);
-}
-
-void tty_mode(int how){ // restore original mode
-	static struct termios original_mode;
-	static int original_flags;
-
-	if(how == 0){
-		tcgetattr(0, &original_mode);
-		original_flags = fcntl(0, F_GETFL);
+void select_action(){
+	int key;
+	int selection = 1;
+	char *selections[] = {"[1] Add",
+		"[2] Delete",
+		"[3] Submit",
+		"[4] Exit"};
+	while(1){
+		for(int i = 0; i < 4; i++){
+			move(23+i,80);
+			if(i + 1 == selection)
+				attron(A_REVERSE);
+			printw("%s", selections[i]);
+			attroff(A_REVERSE);
+		}
+		
+		switch(key = getch()){
+			case KEY_DOWN:
+				if(++selection == 5) selection = 4;
+				break;
+			case KEY_UP:
+				if(--selection == 0) selection = 1;
+				break;
+			default:
+				break;
+		}
+		if(key == 10)
+			break;
 	}
-	else{
-		tcsetattr(0, TCSANOW, &original_mode);
-		original_flags = fcntl(0, F_SETFL, original_flags);
-	}
+	//돼라 제발
 }
+
+
+	void set_crmode(){ // canonical mode OFF
+		struct termios ttystate;
+
+		tcgetattr(0, &ttystate);
+		ttystate.c_lflag &= ~ICANON;
+		ttystate.c_cc[VMIN] = 1;
+		tcsetattr(0, TCSANOW, &ttystate);
+	}
+
+	void set_nodelay_mode(){ // nonblocking mode
+		int termflags;
+		termflags = fcntl(0, F_GETFL);
+		termflags |= O_NDELAY;
+		fcntl(0, F_SETFL, termflags);
+	}
+
+	void tty_mode(int how){ // restore original mode
+		static struct termios original_mode;
+		static int original_flags;
+
+		if(how == 0){
+			tcgetattr(0, &original_mode);
+			original_flags = fcntl(0, F_GETFL);
+		}
+		else{
+			tcsetattr(0, TCSANOW, &original_mode);
+			original_flags = fcntl(0, F_SETFL, original_flags);
+		}
+	}
