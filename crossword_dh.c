@@ -187,7 +187,7 @@ void add(){
 	int selection = 1; // 1:Across, 2:Down
 	char *selections[] = {"[1] Across", "[2] Down"};
 	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
-	char *down[] = {"guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
+	char *down[] = {"", "guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
 	char input[20];
 	int number; // Across, Down의 몇 번째 단어인가?
 
@@ -238,17 +238,20 @@ void add(){
 
 		move(20,58); printw("%s", input);
 
-		number = atoi(&(input[0]));
+		number = atoi(input);
+		char *pass; // input에서 word만을 뗀 것
+		if(number < 10)	pass = input+2;
+		else pass = input+3;
 
 		if(selection == 1){ // Across
-			if(strcmp(across[number], input+2) == 0){
+			if(strcmp(across[number], pass) == 0){
 				clear_box();
 				move(20,58); printw("Yes! Correct answer!");
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
 
-				if(number == 1) add_across(5,9,input+2);
+				if(number == 1) add_across(5,9,pass);
 			}
 			else{
 				clear_box();
@@ -260,7 +263,7 @@ void add(){
 		}
 
 		else{ // Down
-			if(strcmp(across[number], input+2) == 0){
+			if(strcmp(down[number], pass) == 0){
 				clear_box();
 				move(20,58); printw("Yes! Correct answer!");
 				move(LINES-1, COLS-1);
