@@ -18,9 +18,10 @@ void select_across_down_page();
 void add_page(int);
 void add_across(int, int,  char*);
 void add_down(int, int,  char*);
-void delete();
+
 void submit();
 void exit_puzzle();
+
 void set_crmode();
 void set_nodelay_mode(void);
 void tty_mode(int);
@@ -344,9 +345,7 @@ void add_down(int x, int y, char *input){
 	refresh();
 }
 
-	
-void delete(){
-}
+
 void submit(){
 }
 void exit_puzzle(){
