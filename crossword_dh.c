@@ -13,6 +13,8 @@ void add_blank(int, int, int);
 void select_action();
 void clear_box();
 void add();
+void add_across(int, int,  char*);
+void add_down(int, int,  char*);
 void delete();
 void submit();
 void exit_puzzle();
@@ -236,7 +238,7 @@ void add(){
 
 		move(20,58); printw("%s", input);
 
-		number = atoi(&(input[0])); /////////////////여기서 터짐!!!!!!!!!!
+		number = atoi(&(input[0]));
 
 		if(selection == 1){ // Across
 			if(strcmp(across[number], input+2) == 0){
@@ -245,6 +247,8 @@ void add(){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
+
+				if(number == 1) add_across(5,9,input+2);
 			}
 			else{
 				clear_box();
@@ -273,6 +277,17 @@ void add(){
 		}
 		
 	}
+}
+
+void add_across(int x, int y, char *input){
+	for(int i = 0; i < strlen(input); i++){
+		move(x,y + i*5);
+		attron(A_BOLD);
+		printw("%c", input[i]);
+		attroff(A_BOLD);
+	}
+	move(LINES-1, COLS-1);
+	refresh();
 }
 
 void delete(){
