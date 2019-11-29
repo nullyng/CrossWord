@@ -144,13 +144,12 @@ void select_action_page(){
 	int key;
 	int selection = 1;
 	char *selections[] = {"[1] Add",
-		"[2] Delete",
-		"[3] Submit",
-		"[4] Exit"};
+		"[2] Submit",
+		"[3] Exit"};
 
 	keypad(stdscr, TRUE);
 	while(1){
-		for(int i = 0; i < 4; i++){
+		for(int i = 0; i < 3; i++){
 			move(23+i,80);
 			if(i + 1 == selection)
 				attron(A_REVERSE);
@@ -162,7 +161,7 @@ void select_action_page(){
 
 		switch(key = getch()){
 			case KEY_DOWN:
-				if(++selection == 5) selection = 4;
+				if(++selection == 4) selection = 3;
 				break;
 			case KEY_UP:
 				if(--selection == 0) selection = 1;
@@ -175,8 +174,7 @@ void select_action_page(){
 	}
 
 	if(selection == 1) select_across_down_page();
-	else if(selection == 2) delete();
-	else if(selection == 3) submit();
+	else if(selection == 2) submit();
 	else exit_puzzle();
 }
 
