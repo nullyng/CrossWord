@@ -298,6 +298,18 @@ void add_page(int selection){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
+
+				// 퍼즐에 단어 추가하는 부분
+				if(number == 1) add_down(5,9,pass);
+				else if(number == 2) add_down(5,19,pass);
+				else if(number == 3) add_down(5,29,pass);
+				else if(number == 4) add_down(5,39,pass);
+				else if(number == 5) add_down(5,49,pass);
+				else if(number == 10) add_down(17,19,pass);
+				else if(number == 12) add_down(17,49,pass);
+				else if(number == 13) add_down(20,29,pass);
+				else if(number == 14) add_down(23,9,pass);
+				else if(number == 16) add_down(23,39,pass);
 			}
 			else{
 				clear_box();
@@ -321,6 +333,18 @@ void add_across(int x, int y, char *input){
 	refresh();
 }
 
+void add_down(int x, int y, char *input){
+	for(int i = 0; i < strlen(input); i++){
+		move(x + i*3,y);
+		attron(A_BOLD);
+		printw("%c", input[i]);
+		attroff(A_BOLD);
+	}
+	move(LINES-1, COLS-1);
+	refresh();
+}
+
+	
 void delete(){
 }
 void submit(){
