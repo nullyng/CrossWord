@@ -46,7 +46,7 @@ void main(){
 }
 
 void crossword_base() {
-	//                               6    11   16   21   26   31   36   41   46
+	//                       6    11   16   21   26   31   36   41   46
 	move(3, 5);	printw("*--------------------------------------------*");
 	move(4, 5);	printw("|1   |    |2   |    |3   |    |4   |    |5   |"); add_blank(4, 31, 1);
 	move(5, 5);	printw("|    |    |    |    |    |    |    |    |    |"); add_blank(5, 31, 1);
@@ -267,8 +267,20 @@ void add_page(int selection){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
-
+					
+				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_across(5,9,pass);
+				else if(number == 4) add_across(5,39,pass);
+				else if(number == 6) add_across(8,29,pass);
+				else if(number == 7) add_across(11,9,pass);
+				else if(number == 8) add_across(11,39,pass);
+				else if(number == 9) add_across(17,9,pass);
+				else if(number == 11) add_across(17,34,pass);
+				else if(number == 14) add_across(23,9,pass);
+				else if(number == 15) add_across(23,29,pass);
+				else if(number == 17) add_across(26,19,pass);
+				else if(number == 18) add_across(29,9,pass);
+				else if(number == 19) add_across(29,29,pass);
 			}
 			else{
 				clear_box();
