@@ -180,6 +180,7 @@ void clear_box(){
 
 
 void add(){
+	int i;
 	int key;
 	int selection = 1; // 1:Across, 2:Down
 	char *selections[] = {"[1] Across", "[2] Down"};
@@ -192,7 +193,7 @@ void add(){
 
 	keypad(stdscr, TRUE);
 	while(1){
-		for(int i = 0; i < 2; i++){
+		for(i = 0; i < 2; i++){
 			move(24+i,80);
 			if(i + 1 == selection)
 				attron(A_REVERSE);
@@ -221,8 +222,21 @@ void add(){
 		move(20,58); printw("Please write the answer. (example: 20 table)");
 		move(21,58); printw(": ");
 		refresh();
-		getstr(input); // get the input
-		number = atoi(input[0]);
+		
+		i = 0;
+		while(1){ // get the input
+			input[i] = getch();
+			if(input[i] == '\n'){
+				input[i] = '\0';
+				break;
+			}
+			i++;
+		}
+		clear_box();
+
+		move(20,58); printw("%s", input);
+
+		number = atoi(input[0]); /////////////////여기서 터짐!!!!!!!!!!
 
 		if(selection == 1){ // Across
 			if(strcmp(across[number], input+2) == 0){
@@ -257,6 +271,7 @@ void add(){
 				sleep(1);
 			}
 		}
+		
 	}
 }
 
