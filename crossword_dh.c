@@ -9,10 +9,15 @@
 #include <ctype.h>
 #include <string.h>
 
+void edge(); // 게임화면  테두리
 void crossword_base();
 void add_blank(int, int, int);
 void clear_box();
 
+void player1();
+void player2();
+
+void first_page();
 void select_action_page();
 void select_across_down_page();
 void add_page(int);
@@ -22,7 +27,7 @@ void add_down(int, int,  char*);
 void submit_page();
 void exit_page();
 
-void set_crmode();
+void set_cr_noecho_mode();
 void set_nodelay_mode(void);
 void tty_mode(int);
 void screen_demensions();
@@ -33,24 +38,118 @@ int ws_row, ws_col; // window size
 
 void main(){
 	tty_mode(0); // save original mode
-	set_crmode(); // canonical mode OFF
-	//	set_nodelay_mode(); // blocking OFF
+	set_cr_noecho_mode(); // canonical, echo mode OFF
+	//set_nodelay_mode(); // blocking OFF
 	screen_demensions();
 
 	initscr();
 	clear();
 
-	crossword_base();
+	first_page();
+	crossword_base(); // 일단 1p일 때 넘어가게 만듦.
 	select_action_page();	
 
 	if(getchar()){
-		tty_mode(1);
 		endwin();
+		tty_mode(1);
 		return;
 	}
 }
 
+void first_page(){
+	char title[] = "Cross Word";
+	char *menu[] = {"[1] game start","[2] game exit"};
+	//char menu2[] = "2. game exit";
+	char *choose[] = {"[1] 1p","[2] 2p"};
+	int key, cur, dir_r,dir_c,i;
+
+	if(has_colors())
+		start_color();
+	init_pair(1,COLOR_BLACK,COLOR_YELLOW);
+
+	move(12,56);
+	attron(COLOR_PAIR(1));
+	addstr(title);
+	attroff(COLOR_PAIR(1));
+
+	edge();
+
+	move(LINES-1,COLS-1);
+	refresh();
+	sleep(1);
+
+	keypad(stdscr,TRUE);
+	dir_r = 16;
+	dir_c = 54;
+	cur = dir_r;
+
+	while(1){
+		for(i = 0;i<2;i++){
+			move(dir_r+i*2,dir_c);
+			if(i*2+dir_r == cur) attron(A_REVERSE);
+			printw("%s",menu[i]);
+			attroff(A_REVERSE);
+			move(LINES-1, COLS -1);
+			refresh();
+		}
+
+		switch(key = getch()){
+			case KEY_DOWN:
+				if(cur == dir_r) cur+=2;
+				break;
+			case KEY_UP:
+				if(cur == dir_r+2) cur-=2;
+				break;
+			default:
+				break;
+		}
+		if(key == 10)
+			break;
+	}
+	clear();
+	edge();	
+
+	if(cur == dir_r){
+		dir_r -=2;
+		dir_c = 58;
+		cur = dir_r;
+
+		while(1){
+			for(i = 0;i<2;i++){
+				move(dir_r+i*4,dir_c);
+				if(i*4+dir_r == cur) attron(A_REVERSE);
+				printw("%s",choose[i]);
+				attroff(A_REVERSE);
+				move(LINES-1,COLS-1);
+				refresh();
+			}
+			switch(key = getch()){
+				case KEY_DOWN:
+					if(cur == dir_r) cur += 4;
+					break;
+				case KEY_UP:
+					if(cur == dir_r+4) cur -=4;
+					break;
+				default:
+					break;
+			}
+			if(key == 10)
+				break;
+		}		
+	}
+	else
+		exit_page();
+
+//	if(cur = dir_r+4)
+//		player2();
+
+	// 1p, 2p일 때 어떻게 할 것인가?? 일단 둘 다 게임화면 뜨게 해놨음
+	clear();
+}
+
 void crossword_base() {
+	edge();
+
 	//                       6    11   16   21   26   31   36   41   46
 	move(3, 5);	printw("*--------------------------------------------*");
 	move(4, 5);	printw("|1   |    |2   |    |3   |    |4   |    |5   |"); add_blank(4, 31, 1);
@@ -126,8 +225,17 @@ void crossword_base() {
 	move(30, 56);	printw("*************************************************************");
 	attroff(A_BOLD);
 
+
 	move(LINES - 1, COLS - 1);
 	refresh();
+}
+
+void edge(){
+	for(int i = 0; i <= 32; i++){
+		move(i,122); printw("|");
+	}
+	move(33,0);
+	printw("--------------------------------------------------------------------------------------------------------------------------+");
 }
 
 void add_blank(int x, int y, int n){
@@ -209,14 +317,14 @@ void select_across_down_page() {
 		}
 
 		switch (key = getch()) {
-		case KEY_DOWN:
-			if (++selection == 4) selection = 3;
-			break;
-		case KEY_UP:
-			if (--selection == 0) selection = 1;
-			break;
-		default:
-			break;
+			case KEY_DOWN:
+				if (++selection == 4) selection = 3;
+				break;
+			case KEY_UP:
+				if (--selection == 0) selection = 1;
+				break;
+			default:
+				break;
 		}
 		if (key == 10)
 			break;
@@ -245,7 +353,7 @@ void add_page(int selection){
 		}
 		move(21,58); printw(": ");
 		refresh();
-		
+
 		i = 0;
 		while(1){ // get the input
 			input[i] = getch();
@@ -274,7 +382,7 @@ void add_page(int selection){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
-				
+
 				cnt_across++;
 
 				// 퍼즐에 단어 추가하는 부분
@@ -369,13 +477,17 @@ void submit_page(){
 }
 
 void exit_page(){
+	endwin();
+	tty_mode(1);
+	exit(0);
 }
 
-void set_crmode(){ // canonical mode OFF
+void set_cr_noecho_mode(){ // canonical mode OFF
 	struct termios ttystate;
 
 	tcgetattr(0, &ttystate);
 	ttystate.c_lflag &= ~ICANON;
+	ttystate.c_lflag &= ~ECHO;
 	ttystate.c_cc[VMIN] = 1;
 	tcsetattr(0, TCSANOW, &ttystate);
 }
