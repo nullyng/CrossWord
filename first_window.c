@@ -4,6 +4,13 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+#define HOSTNAME 123 
+#define PORT 123
 
 int ws_row, ws_col;
 
@@ -126,9 +133,28 @@ int main()
 
 void player2()
 {
+	struct sockaddr_in servadd;
+	struct hostent *hp;
+	int sock_id;
+	char message[BUFSIZ];
+	int messlen;
+
 	clear();
+	
+	sock_id = socket(AF_INET,SOCK_STREAM,0);
+	if(sock_id == -1)
+		oops("socket");
+	
+	memset(&servadd, 0,sizeof(servadd));
+	servadd.sin_family = AF_INET;
+	servadd.sin_addr.s_addr = inet_addr(HOSTNAME);
+	servadd.sin_port = htons(PORT);
+
+	if(connect(sock_id, (struct sokaddr *)&servadd, sizeof(servadd))!=0)
+		oops("connect");
 
 }
+
 void screen_demensions()
 {
 	struct winsize wbuf;

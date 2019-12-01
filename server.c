@@ -7,16 +7,16 @@
 #include <netdb.h>
 #include <string.h>
 
-#define PORTNUM 1342
-#define HOSTLEN 256
 #define oops(msg) { perror(msg); exit(1); }
 
 int main(int ac, char *av[])
 {
-	struct sockaddr_in serv_addr;
-	FILE *sock_fp;
-	int serv_sock, sock_fd;
-	char message[] = "Cross Word";
+	struct sockaddr_in serv_addr, clnt_addr;
+	int serv_sock, sock_fd1, sock_fd2, value1, value2;
+	char message1[BUFSIZ], message2[BUFSIZ];
+	//char send1[] = "hi, i'm server. you're sock_fd1\n";
+	//char send2[] = "hi, i'm server. you're sock_fd2\n";
+	int s1, s2;
 
 	if(ac != 2)
 	{
@@ -30,7 +30,7 @@ int main(int ac, char *av[])
 		oops("socket");
 
 	// bind address to socket. Address is host, port
-	memset(&serv_addr, 0, sizeof(serv_addr));	
+	memset(&serv_addr, 0, sizeof(serv_addr)); // serv_addr[0]부터 sizeof(serv_addr)만큼 0으로 지정	
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serv_addr.sin_port = htons(atoi(av[1]));
@@ -42,20 +42,21 @@ int main(int ac, char *av[])
 	if(listen(serv_sock, 1) != 0)
 		oops("listen");
 
-	// main loop: accept(), write(), close()
+	// accept
+	sock_fd1 = accept(serv_sock, NULL, NULL); // accept은 blocking
+	sock_fd2 = accept(serv_sock, NULL, NULL); // 2개가 들어올 때까지 기다림
+	if(sock_fd1 == -1 || sock_fd2 == -1)
+		oops("accept");
+	printf("successfully connected!\n");
+
 	while(1)
 	{
-		sock_fd = accept(serv_sock, NULL, NULL);
-		printf("got a call\n");
-		if(sock_fd == -1)
-			oops("accept");
+		value1 = recv(sock_fd1, message1, sizeof(message1), MSG_DONTWAIT);
+		value2 = recv(sock_fd2, message2, sizeof(message2), MSG_DONTWAIT);
 
-		sock_fp = fdopen(sock_fd, "w");
-		if(sock_fp == NULL)
-			oops("fdopen");
-
-		fprintf(sock_fp, "%s\n",  message);
-
-		fclose(sock_fp);
+		if(value1 != -1)
+			printf("%s\n", message1);
+		if(value2 != -1)
+			printf("%s\n", message2);
 	}
 }
