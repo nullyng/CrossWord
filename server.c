@@ -49,13 +49,6 @@ int main(int ac, char *av[])
 		oops("accept");
 	printf("successfully connected!\n");
 
-	/*
-	s1 = send(sock_fd1, send1, strlen(send1), 0);
-	s2 = send(sock_fd2, send2, strlen(send2), 0);
-	if(s1 == -1 || s2 == -1)
-		oops("send");
-	*/
-	
 	while(1)
 	{
 		value1 = recv(sock_fd1, message1, sizeof(message1), MSG_DONTWAIT);
