@@ -19,25 +19,29 @@ void add_page(int);
 void add_across(int, int,  char*);
 void add_down(int, int,  char*);
 
-void submit();
-void exit_puzzle();
+void submit_page();
+void exit_page();
 
 void set_crmode();
 void set_nodelay_mode(void);
 void tty_mode(int);
+void screen_demensions();
+
+int cnt_across = 0;
+int cnt_down = 0;
+int ws_row, ws_col; // window size
 
 void main(){
 	tty_mode(0); // save original mode
 	set_crmode(); // canonical mode OFF
 	//	set_nodelay_mode(); // blocking OFF
+	screen_demensions();
 
 	initscr();
 	clear();
 
 	crossword_base();
-	select_action_page();
-
-	
+	select_action_page();	
 
 	if(getchar()){
 		tty_mode(1);
@@ -143,14 +147,12 @@ void add_blank(int x, int y, int n){
 void select_action_page(){
 	int key;
 	int selection = 1;
-	char *selections[] = {"[1] Add",
-		"[2] Submit",
-		"[3] Exit"};
+	char *selections[] = {"[1] Add", "[2] Exit"};
 
 	keypad(stdscr, TRUE);
 	while(1){
-		for(int i = 0; i < 3; i++){
-			move(23+i,80);
+		for(int i = 0; i < 2; i++){
+			move(24+i,80);
 			if(i + 1 == selection)
 				attron(A_REVERSE);
 			printw("%s", selections[i]);
@@ -161,7 +163,7 @@ void select_action_page(){
 
 		switch(key = getch()){
 			case KEY_DOWN:
-				if(++selection == 4) selection = 3;
+				if(++selection == 3) selection = 2;
 				break;
 			case KEY_UP:
 				if(--selection == 0) selection = 1;
@@ -174,8 +176,7 @@ void select_action_page(){
 	}
 
 	if(selection == 1) select_across_down_page();
-	else if(selection == 2) submit();
-	else exit_puzzle();
+	else exit_page();
 }
 
 void clear_box(){
@@ -190,14 +191,14 @@ void clear_box(){
 void select_across_down_page() {
 	int i;
 	int key;
-	int selection = 1; // 1:Across, 2:Down
-	char *selections[] = { "[1] Across", "[2] Down" };
+	int selection = 1; // 1:Across, 2:Down, 3:Submit
+	char *selections[] = { "[1] Across", "[2] Down", "[3] Submit" };
 
 	clear_box();
 
 	keypad(stdscr, TRUE);
 	while (1) {
-		for (i = 0; i < 2; i++) {
+		for (i = 0; i < 3; i++) {
 			move(24 + i, 80);
 			if (i + 1 == selection)
 				attron(A_REVERSE);
@@ -209,7 +210,7 @@ void select_across_down_page() {
 
 		switch (key = getch()) {
 		case KEY_DOWN:
-			if (++selection == 3) selection = 2;
+			if (++selection == 4) selection = 3;
 			break;
 		case KEY_UP:
 			if (--selection == 0) selection = 1;
@@ -222,7 +223,8 @@ void select_across_down_page() {
 	}
 
 	if (selection == 1) add_page(1);
-	else add_page(2);
+	else if(selection == 2) add_page(2);
+	else submit_page();
 }
 
 void add_page(int selection){
@@ -234,7 +236,13 @@ void add_page(int selection){
 
 	while(1){
 		clear_box();
-		move(20,58); printw("Please write the answer. (example: 20 table || back)");
+
+		if(cnt_across == 12 && cnt_down == 10){
+			move(20,58); printw("You filled all blanks. Please enter 'back' and submit!");
+		}
+		else{
+			move(20,58); printw("Please write the answer. (example: 20 table || back)");
+		}
 		move(21,58); printw(": ");
 		refresh();
 		
@@ -266,7 +274,9 @@ void add_page(int selection){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
-					
+				
+				cnt_across++;
+
 				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_across(5,9,pass);
 				else if(number == 4) add_across(5,39,pass);
@@ -297,6 +307,8 @@ void add_page(int selection){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
+
+				cnt_down++;
 
 				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_down(5,9,pass);
@@ -344,9 +356,19 @@ void add_down(int x, int y, char *input){
 }
 
 
-void submit(){
+void submit_page(){
+	char message[] = "CLEAR! Congratulations!";
+
+	clear();
+	move(ws_row/2, ws_col/2 - strlen(message)/2);
+	attron(A_BOLD);
+	addstr(message);
+	attroff(A_BOLD);
+	move(LINES-1, COLS-1);
+	refresh();
 }
-void exit_puzzle(){
+
+void exit_page(){
 }
 
 void set_crmode(){ // canonical mode OFF
@@ -376,5 +398,14 @@ void tty_mode(int how){ // restore original mode
 	else{
 		tcsetattr(0, TCSANOW, &original_mode);
 		original_flags = fcntl(0, F_SETFL, original_flags);
+	}
+}
+
+void screen_demensions(){
+	struct winsize wbuf;
+
+	if(ioctl(0, TIOCGWINSZ, &wbuf) != -1){
+		ws_row = wbuf.ws_row;
+		ws_col = wbuf.ws_col;
 	}
 }
