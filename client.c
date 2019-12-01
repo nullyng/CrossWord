@@ -39,12 +39,12 @@ int main(int ac, char *av[])
 	// transfer data from server, then hangup
 	while(1)
 	{	
-		gets(message);
+		gets(message); // 메세지 입력
 
-		if(strcmp(message, "quit") == 0)
+		if(strcmp(message, "quit") == 0) // quit일 때 break
 			break;
 
-		send(sock_id, message, sizeof(message), 0);
+		send(sock_id, message, sizeof(message), 0); // 서버로 메세지 보냄
 	}
 
 	close(sock_id);
