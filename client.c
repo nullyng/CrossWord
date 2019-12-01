@@ -30,18 +30,23 @@ int main(int ac, char *av[])
 	// connet to server
 	memset(&servadd, 0, sizeof(servadd));
 	servadd.sin_family = AF_INET;
-	servadd.sin_addr.s_addr = inet_addr(av[1]);
-	servadd.sin_port = htons(atoi(av[2]));	
+	servadd.sin_addr.s_addr = inet_addr(av[1]); // ip
+	servadd.sin_port = htons(atoi(av[2])); // portnum
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
 
 	// transfer data from server, then hangup
-	messlen = read(sock_id, message, BUFSIZ);
-	if(messlen == -1)
-		oops("read");
-	if(write(1, message, messlen) != messlen)
-		oops("write");
+	while(1)
+	{	
+		gets(message);
+
+		if(strcmp(message, "quit") == 0)
+			break;
+
+		send(sock_id, message, sizeof(message), 0);
+	}
+
 	close(sock_id);
 
 	return 0;
