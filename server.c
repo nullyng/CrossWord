@@ -49,7 +49,7 @@ int main(int ac, char *av[])
 		oops("accept");
 	printf("successfully connected!\n");	
 
-	while(1)
+	/*while(1)
 	{
 		value1 = recv(sock_fd1, message1, strlen(message1), MSG_DONTWAIT);
 		value2 = recv(sock_fd2, message2, strlen(message2), MSG_DONTWAIT);
@@ -57,16 +57,24 @@ int main(int ac, char *av[])
 		if(value1 != -1)
 		{
 			printf("server receive %s, from %d\n", message1, sock_fd1);
-			res = send(sock_fd2, message1, strlen(message1), 0);
-			if(res == -1)
-				oops("write");
+		
 		}
 		if(value2 != -1)
 		{
 			printf("server receive %s, from %d\n", message2, sock_fd2);
-			res = send(sock_fd1, message2, strlen(message2), 0);
-			if(res == -1)
-				oops("write");
+		//	res = send(sock_fd1, message2, strlen(message2), 0);
+		//	if(res == -1)
+		//		oops("write");
+		//	memset(message1, 0, sizeof(message1));
+			
 		}
+	}*/
+
+	while((res = recv(sock_fd1, message1, strlen(message1), 0)) != 0)
+	{
+		printf("message from %d: %s\n", sock_fd1, message1);
+		send(sock_fd1, message1, res,0);
 	}
+
+	close(sock_fd1);
 }
