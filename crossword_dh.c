@@ -18,6 +18,7 @@ void player1();
 void player2();
 
 void first_page();
+void info_page();
 void select_action_page();
 void select_across_down_page();
 void add_page(int);
@@ -55,7 +56,7 @@ void main(){
 
 void first_page(){
 	char title[] = "Cross Word";
-	char *menu[] = {"[1] game start","[2] game description","[3] game exit"};
+	char *menu[] = {"[1] game start","[2] game info","[3] game exit"};
 	//char menu2[] = "2. game exit";
 	char *choose[] = {"[1] 1p","[2] 2p"};
 	int key, cur, dir_r,dir_c,i;
@@ -106,7 +107,9 @@ void first_page(){
 	clear();
 	edge();	
 
-	if(cur == dir_r){
+	if(cur == dir_r+2) info_page();
+
+	else if(cur == dir_r){
 		dir_r -=2;
 		dir_c = 58;
 		cur = dir_r;
@@ -134,8 +137,7 @@ void first_page(){
 				break;
 		}		
 	}
-	else
-		exit_page();
+	else exit_page();
 
 	//	if(cur = dir_r+4)
 	//		player2();
@@ -143,6 +145,49 @@ void first_page(){
 	// 1p, 2p일 때 어떻게 할 것인가?? 일단 둘 다 게임화면 뜨게 해놨음
 	clear();
 }
+
+void info_page(){
+	char *info[] = {
+		"INFO",
+		"Hello guys! This is CrossWord Puzzle!",
+		"You can deduce from given explanations,",
+		"and fill in the blanks!",
+		"Let's study some English words with this game!"};
+	char *developers[] = {
+		"Developers",
+		"2018111947 Kim Dohee",
+		"2018113910 Kim Juyoung",
+		"2018111138 Baek Hyewon"};
+	
+	attron(A_BOLD|A_UNDERLINE);
+	move(10, 61-strlen(info[0])/2);
+	addstr(info[0]);
+	attroff(A_UNDERLINE);
+
+	for(int i = 1; i <= 4; i++){
+		move(11+i, 61-strlen(info[i])/2);
+		addstr(info[i]);
+	}
+
+	attron(A_UNDERLINE);
+	move(18, 61-strlen(developers[0])/2);
+	addstr(developers[0]);
+	attroff(A_UNDERLINE);
+
+	for(int i = 1; i <=3; i++){
+		move(19+i, 61-strlen(developers[i])/2);
+		addstr(developers[i]);
+	}
+	attroff(A_BOLD);
+	move(LINES-1, COLS-1);
+	refresh();
+	sleep(5);
+
+	clear();
+	first_page();
+}
+
+
 
 void crossword_base() {
 	edge();
