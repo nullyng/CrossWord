@@ -52,6 +52,7 @@ int cnt_across = 0;
 int cnt_down = 0;
 pthread_mutex_t counter_lock1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t counter_lock2 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
 int ws_row, ws_col; // window size
 char buf[20];
 
@@ -400,6 +401,7 @@ void add_page1(int selection){
 	int i;
 	char input[20];
 	char *sendstr;
+	struct info *data;
 
 	while(1){
 		clear_box();
@@ -432,29 +434,31 @@ void add_page1(int selection){
 		if(selection == 1){ // Across
 			if(strcmp(across[number], pass) == 0){
 				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
-				send(sock_id,sendstr,strlen(sendstr));
+				write(sock_id,sendstr,strlen(sendstr)+1);
 			}
 		}
 		else{ // Down
 			if(strcmp(down[number], pass) == 0){
 				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
-				send(sock_id,sendstr,strlen(sendstr));
+				write(sock_id,sendstr,strlen(sendstr)+1);
 			}
 		}
-		add_page2(input,selection);
+		data->selection = selection;
+		strcpy(data->input_s,input);
+		add_page2(data);
 	}
 }
 
 void add_page2(struct info *input){
-
+	pthread_mutex_lock(&input_lock);
 	int number; // Across, Down의 몇 번째 단어인가?
-	number = atoi(input);
+	number = atoi(input->input_s[0]);
 	char *pass; // input에서 word만을 뗀 것
 
-	if(number < 10)	pass = input+2;
-	else pass = input+3;
+	if(number < 10)	pass = input->input_s+2;
+	else pass = input->input_s+3;
 
-	if(selection == 1){ // Across
+	if(input->selection == 1){ // Across
 		if(strcmp(across[number], pass) == 0){
 			clear_box();
 			move(20,58); printw("Yes! Correct answer!");
@@ -462,9 +466,7 @@ void add_page2(struct info *input){
 			refresh();
 			sleep(1);
 
-			pthread_mutex_lock(&counter_lock1);
 			cnt_across++;
-			pthread_mutex_lock(&counter_lock1);
 
 			// 퍼즐에 단어 추가하는 부분
 			if(number == 1) add_across(5,9,pass);
@@ -497,9 +499,7 @@ void add_page2(struct info *input){
 			refresh();
 			sleep(1);
 
-			pthread_mutex_lock(&counter_lock2);
 			cnt_down++;
-			pthread_mutex_unlock(&counter_lock2);
 
 			// 퍼즐에 단어 추가하는 부분
 			if(number == 1) add_down(5,9,pass);
@@ -521,6 +521,7 @@ void add_page2(struct info *input){
 			sleep(1);
 		}
 	}
+	pthread_mutex_unlock(&input_lock);
 }
 void add_across(int x, int y, char *input){
 	for(int i = 0; i < strlen(input); i++){
