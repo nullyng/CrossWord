@@ -417,7 +417,7 @@ void add_page1(int selection){
 	}
 }
 
-void add_page2(char intpu[], int selection){
+void add_page2(char intput[], int selection){
 
 	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
 	char *down[] = {"", "guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
