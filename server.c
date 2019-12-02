@@ -56,19 +56,15 @@ int main(int ac, char *av[])
 
 		if(value1 != -1)
 		{
-			res = write(sock_fd2, message1, strlen(message1));
+			res = send(sock_fd2, message1, strlen(message1), 0);
 			if(res == -1)
 				oops("write");
 		}
 		if(value2 != -1)
 		{
-			res = write(sock_fd1, message2, strlen(message2));
+			res = send(sock_fd1, message2, strlen(message2), 0);
 			if(res == -1)
 				oops("write");
 		}
-		if(value1 == 0)
-			break;
-		if(value2 == 0)
-			break;
 	}
 }
