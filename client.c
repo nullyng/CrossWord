@@ -11,7 +11,7 @@
 #define oops(msg) { perror(msg); exit(1); }
 
 int sock_id;
-void *receive();
+//void *receive();
 
 int main(int ac, char *av[])
 {
@@ -42,25 +42,29 @@ int main(int ac, char *av[])
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
 
-	pthread_create(&t, NULL, receive, NULL);
+	//pthread_create(&t, NULL, receive, NULL);
 	// transfer data from server, then hangup
 	while(1)
 	{	
-		gets(message); // 메세지 입력
+		fgets(message, BUFSIZ, stdin); // 메세지 입력
 
 		if(strcmp(message, "quit") == 0) // quit일 때 break
 			break;
 
-		send(sock_id, message, sizeof(message), 0); // 서버로 메세지 보냄
+		send(sock_id, message, strlen(message), 0);	// 서버로 메세지 보냄
+		result = recv(sock_id, message, BUFSIZ-1, 0);
+		message[result] = 0;
+
+		printf("Message from server: %s\n", message);
 	}
-	pthread_join(t, (void *)&result);
+	//pthread_join(t, (void *)&result);
 
 	close(sock_id);
 
 	return 0;
 }
 
-void *receive()
+/*void *receive()
 {
 	char msg[BUFSIZ];
 	int value;
@@ -74,4 +78,4 @@ void *receive()
 			printf("receive: %s\n", msg);
 		}
 	}
-}
+}*/
