@@ -50,8 +50,10 @@ void screen_demensions();
 //int selection = 1;
 int cnt_across = 0;
 int cnt_down = 0;
-pthread_mutex_t counter_lock1 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t counter_lock2 = PTHREAD_MUTEX_INITIALIZER;
+int flag = 0; //sumbit signal
+//pthread_mutex_t counter_lock1 = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t counter_lock2 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
 int ws_row, ws_col; // window size
 char buf[20];
 
@@ -192,15 +194,27 @@ void player2()
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd))!=0)
 		oops("connect");
 
-	read(sock_id,buf,strlen(buf));
+	pthread_create(&t1, NULL, thread_loop,NULL);
+}
 
-	while(buf != NULL)
-		*(temp[i++]) = strtok(buf," ");
+void thread_loop(void){
+	int i;
+	char *temp[3];
+	struct info *data;	
 
-	sptintf(data->input_s,"%s %s",temp[1],temp[2]);
-	data->selection	= atoi(temp[0]);
+	while(flag !=1){
+		i = 0;
+		read(sock_id,buf,strlen(buf));
 
-	pthread_create(&t1, NULL, add_page2,(void *)data);
+		temp[i] = strtok(buf," ");
+		while(temp[i]!=NULL)
+			temp[++i]=strtok(NULL," ");
+		
+		sptintf(data->input_s,"%s %s",temp[1],temp[2]);
+		data->selection = atoi(temp[0]);
+
+		add_page(data);	
+	}
 }
 
 void crossword_base() {
@@ -400,11 +414,13 @@ void add_page1(int selection){
 	int i;
 	char input[20];
 	char *sendstr;
+	struct info *data;
 
 	while(1){
 		clear_box();
 
 		if(cnt_across == 12 && cnt_down == 10){
+			flag = 1;
 			move(20,58); printw("You filled all blanks. Please enter 'back' and submit!");
 		}
 		else{
@@ -432,29 +448,31 @@ void add_page1(int selection){
 		if(selection == 1){ // Across
 			if(strcmp(across[number], pass) == 0){
 				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
-				send(sock_id,sendstr,strlen(sendstr));
+				write(sock_id,sendstr,strlen(sendstr)+1);
 			}
 		}
 		else{ // Down
 			if(strcmp(down[number], pass) == 0){
 				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
-				send(sock_id,sendstr,strlen(sendstr));
+				write(sock_id,sendstr,strlen(sendstr)+1);
 			}
 		}
-		add_page2(input,selection);
+		data->selection = selection;
+		strcpy(data->input_s,input);
+		add_page2(data);
 	}
 }
 
 void add_page2(struct info *input){
-
+	pthread_mutex_lock(&input_lock);
 	int number; // Across, Down의 몇 번째 단어인가?
-	number = atoi(input);
+	number = atoi(input->input_s[0]);
 	char *pass; // input에서 word만을 뗀 것
 
-	if(number < 10)	pass = input+2;
-	else pass = input+3;
+	if(number < 10)	pass = input->input_s+2;
+	else pass = input->input_s+3;
 
-	if(selection == 1){ // Across
+	if(input->selection == 1){ // Across
 		if(strcmp(across[number], pass) == 0){
 			clear_box();
 			move(20,58); printw("Yes! Correct answer!");
@@ -462,9 +480,7 @@ void add_page2(struct info *input){
 			refresh();
 			sleep(1);
 
-			pthread_mutex_lock(&counter_lock1);
 			cnt_across++;
-			pthread_mutex_lock(&counter_lock1);
 
 			// 퍼즐에 단어 추가하는 부분
 			if(number == 1) add_across(5,9,pass);
@@ -497,9 +513,7 @@ void add_page2(struct info *input){
 			refresh();
 			sleep(1);
 
-			pthread_mutex_lock(&counter_lock2);
 			cnt_down++;
-			pthread_mutex_unlock(&counter_lock2);
 
 			// 퍼즐에 단어 추가하는 부분
 			if(number == 1) add_down(5,9,pass);
@@ -521,6 +535,7 @@ void add_page2(struct info *input){
 			sleep(1);
 		}
 	}
+	pthread_mutex_unlock(&input_lock);
 }
 void add_across(int x, int y, char *input){
 	for(int i = 0; i < strlen(input); i++){
