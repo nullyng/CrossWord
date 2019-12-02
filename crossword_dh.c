@@ -31,8 +31,8 @@ void set_cr_noecho_mode();
 void set_nodelay_mode(void);
 void tty_mode(int);
 
-int cnt_across = 0;
-int cnt_down = 0;
+int cnt_across = 0; // total 12
+int cnt_down = 0; // total 10
 
 void main(){
 	tty_mode(0); // save original mode
@@ -137,8 +137,8 @@ void first_page(){
 	else
 		exit_page();
 
-//	if(cur = dir_r+4)
-//		player2();
+	//	if(cur = dir_r+4)
+	//		player2();
 
 	// 1p, 2p일 때 어떻게 할 것인가?? 일단 둘 다 게임화면 뜨게 해놨음
 	clear();
@@ -233,6 +233,9 @@ void edge(){
 	}
 	move(33,0);
 	printw("--------------------------------------------------------------------------------------------------------------------------+");
+
+	// row의 중간: 16
+	// col의 중간: 61
 }
 
 void add_blank(int x, int y, int n){
@@ -253,6 +256,8 @@ void select_action_page(){
 	int key;
 	int selection = 1;
 	char *selections[] = {"[1] Add", "[2] Exit"};
+
+	clear_box();
 
 	keypad(stdscr, TRUE);
 	while(1){
@@ -297,14 +302,14 @@ void select_across_down_page() {
 	int i;
 	int key;
 	int selection = 1; // 1:Across, 2:Down, 3:Submit
-	char *selections[] = { "[1] Across", "[2] Down", "[3] Submit" };
+	char *selections[] = { "[1] Across", "[2] Down", "[3] Submit", "[4] Exit" };
 
 	clear_box();
 
 	keypad(stdscr, TRUE);
 	while (1) {
-		for (i = 0; i < 3; i++) {
-			move(24 + i, 80);
+		for (i = 0; i < 4; i++) {
+			move(23 + i, 80);
 			if (i + 1 == selection)
 				attron(A_REVERSE);
 			printw("%s", selections[i]);
@@ -315,7 +320,7 @@ void select_across_down_page() {
 
 		switch (key = getch()) {
 			case KEY_DOWN:
-				if (++selection == 4) selection = 3;
+				if (++selection == 5) selection = 4;
 				break;
 			case KEY_UP:
 				if (--selection == 0) selection = 1;
@@ -329,13 +334,14 @@ void select_across_down_page() {
 
 	if (selection == 1) add_page(1);
 	else if(selection == 2) add_page(2);
-	else submit_page();
+	else if(selection == 3) submit_page();
+	else exit_page();
 }
 
 void add_page(int selection){
 	int i;
-	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
-	char *down[] = {"", "guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
+	char *across[] = {"0 empty", "grill", "2 empty", "3 empty", "dig", "5 empty",  "our", "again", "ant", "dime", "10 empty",  "snow", "12 empty", "13 empty",  "can", "olive", "16 empty", "owl", "tar", "lolly"};
+	char *down[] = {"0 empty", "guard", "IRA", "long", "drain", "get", "6 empty", "7 empty", "8 empty", "9 empty", "minor", "11 empty", "weedy", "roll", "cat", "15 empty", "ill"};
 	char input[20];
 	int number; // Across, Down의 몇 번째 단어인가?
 
@@ -343,7 +349,13 @@ void add_page(int selection){
 		clear_box();
 
 		if(cnt_across == 12 && cnt_down == 10){
-			move(20,58); printw("You filled all blanks. Please enter 'back' and submit!");
+			move(20,58); printw("You filled all blanks.");
+			move(21,58); printw("Let's summit now!!");
+			move(LINES-1, COLS-1);
+			refresh();
+			sleep(2);
+			select_across_down_page();
+			break;
 		}
 		else{
 			move(20,58); printw("Please write the answer. (example: 20 table || back)");
@@ -380,7 +392,7 @@ void add_page(int selection){
 				refresh();
 				sleep(1);
 
-				cnt_across++;
+				if(cnt_across < 12) cnt_across++; // 12 이상으로 못 올라가게
 
 				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_across(5,9,pass);
@@ -413,7 +425,7 @@ void add_page(int selection){
 				refresh();
 				sleep(1);
 
-				cnt_down++;
+				if(cnt_down < 10) cnt_down++; // 10 이상으로 못 올라가게
 
 				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_down(5,9,pass);
@@ -462,16 +474,36 @@ void add_down(int x, int y, char *input){
 
 
 void submit_page(){
-	char message[] = "CLEAR! Congratulations!";
+	char success[] = "CLEAR! Congratulations!";
+	char success2[] = "Enter the any key to exit.";
 
-	clear();
-	edge();
-	move(16, 50);
-	attron(A_BOLD);
-	addstr(message);
-	attroff(A_BOLD);
-	move(LINES-1, COLS-1);
-	refresh();
+	if(cnt_across == 12 && cnt_down == 10){ // success
+		clear();
+		edge();
+
+		attron(A_BOLD);
+		move(16, 61-strlen(success)/2);
+		addstr(success);
+		move(17, 61-strlen(success2)/2);
+		addstr(success2);
+		attroff(A_BOLD);
+
+		move(LINES-1, COLS-1);
+		refresh();
+	}
+	else{ // fail
+		clear_box();
+		attron(A_BOLD);
+		move(20,58); printw("The blanks are not filled yet!");
+		move(21,58); printw("Go back and fighting!");
+		attroff(A_BOLD);
+
+		move(LINES-1, COLS-1);
+		refresh();
+
+		sleep(2);
+		select_across_down_page();
+	}
 }
 
 void exit_page(){
