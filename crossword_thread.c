@@ -18,10 +18,10 @@
 #define HOSTNAME 123
 #define PORT 123
 
-typedef struct input_f{
+struct info {
 	int selection;
-	char input[20];
-}input_f;
+	char input_s[20];
+};
 
 void edge(); // 게임화면  테두리
 void crossword_base();
@@ -35,7 +35,7 @@ void first_page();
 void select_action_page();
 void select_across_down_page();
 void add_page1(int);
-void add_page2(char[],int);
+void add_page2(struct info*);
 void add_across(int, int,  char*);
 void add_down(int, int,  char*);
 
@@ -53,6 +53,7 @@ int cnt_down = 0;
 pthread_mutex_t counter_lock1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t counter_lock2 = PTHREAD_MUTEX_INITIALIZER;
 int ws_row, ws_col; // window size
+char buf[20];
 
 void main(){
 	tty_mode(0); // save original mode
@@ -172,6 +173,9 @@ void player2()
 	int sock_id;
 	char message[BUFSIZ];
 	int messlen;
+	int i = 0;
+	char *temp[3];
+	struct info *data;
 	pthread_t t1;
 
 	clear();
@@ -188,6 +192,15 @@ void player2()
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd))!=0)
 		oops("connect");
 
+	read(sock_id,buf,strlen(buf));
+
+	while(buf != NULL)
+		*(temp[i++]) = strtok(buf," ");
+
+	sptintf(data->input_s,"%s %s",temp[1],temp[2]);
+	data->selection	= atoi(temp[0]);
+
+	pthread_create(&t1, NULL, add_page2,(void *)data);
 }
 
 void crossword_base() {
@@ -379,9 +392,14 @@ void select_across_down_page() {
 }
 
 void add_page1(int selection){
+	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
+	char *down[] = {"", "guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
+	int number; // Across, Down의 몇 번째 단어인가?
+	number = atoi(input);
+	char *pass; // input에서 word만을 뗀 것
 	int i;
 	char input[20];
-	input_f info;
+	char *sendstr;
 
 	while(1){
 		clear_box();
@@ -410,20 +428,29 @@ void add_page1(int selection){
 			select_across_down_page();
 			return;
 		}
-		
-		send(sock_id,&info,sizeof(info),0);
-		add_page2(input,selection);
 
+		if(selection == 1){ // Across
+			if(strcmp(across[number], pass) == 0){
+				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
+				send(sock_id,sendstr,strlen(sendstr));
+			}
+		}
+		else{ // Down
+			if(strcmp(down[number], pass) == 0){
+				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
+				send(sock_id,sendstr,strlen(sendstr));
+			}
+		}
+		add_page2(input,selection);
 	}
 }
 
-void add_page2(char intput[], int selection){
+void add_page2(struct info *input){
 
-	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
-	char *down[] = {"", "guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
 	int number; // Across, Down의 몇 번째 단어인가?
 	number = atoi(input);
 	char *pass; // input에서 word만을 뗀 것
+
 	if(number < 10)	pass = input+2;
 	else pass = input+3;
 

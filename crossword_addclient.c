@@ -50,6 +50,8 @@ int cnt_across = 0;
 int cnt_down = 0;
 int ws_row, ws_col; // window size
 char input[20];
+pthread_mutex_t counter_lock1 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t counter_lock2 = PTHREAD_MUTEX_INITIALIZER;
 
 void main(){
 	tty_mode(0); // save original mode
@@ -184,7 +186,6 @@ void player2()
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd))!=0)
 		oops("connect");
-
 	
 
 }
@@ -424,8 +425,10 @@ void add_page(int selection){
 				move(LINES-1, COLS-1);
 				refresh();
 				sleep(1);
-
+				
+				pthread_mutex_lock(&counter_lock1);
 				cnt_across++;
+				pthread_mutex_unlock(&counter_lock1);
 
 				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_across(5,9,pass);
@@ -458,7 +461,9 @@ void add_page(int selection){
 				refresh();
 				sleep(1);
 
+				pthread_mutex_lock(&counter_lock2);
 				cnt_down++;
+				pthread_mutex_unlock(&counter_lock2);
 
 				// 퍼즐에 단어 추가하는 부분
 				if(number == 1) add_down(5,9,pass);
