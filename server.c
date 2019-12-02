@@ -56,12 +56,14 @@ int main(int ac, char *av[])
 
 		if(value1 != -1)
 		{
+			printf("server receive %s, from %d\n", message1, sock_fd1);
 			res = send(sock_fd2, message1, strlen(message1), 0);
 			if(res == -1)
 				oops("write");
 		}
 		if(value2 != -1)
 		{
+			printf("server receive %s, from %d\n", message2, sock_fd2);
 			res = send(sock_fd1, message2, strlen(message2), 0);
 			if(res == -1)
 				oops("write");
