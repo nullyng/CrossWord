@@ -30,17 +30,14 @@ void exit_page();
 void set_cr_noecho_mode();
 void set_nodelay_mode(void);
 void tty_mode(int);
-void screen_demensions();
 
 int cnt_across = 0;
 int cnt_down = 0;
-int ws_row, ws_col; // window size
 
 void main(){
 	tty_mode(0); // save original mode
 	set_cr_noecho_mode(); // canonical, echo mode OFF
 	//set_nodelay_mode(); // blocking OFF
-	screen_demensions();
 
 	initscr();
 	clear();
@@ -468,7 +465,8 @@ void submit_page(){
 	char message[] = "CLEAR! Congratulations!";
 
 	clear();
-	move(ws_row/2, ws_col/2 - strlen(message)/2);
+	edge();
+	move(16, 50);
 	attron(A_BOLD);
 	addstr(message);
 	attroff(A_BOLD);
@@ -510,14 +508,5 @@ void tty_mode(int how){ // restore original mode
 	else{
 		tcsetattr(0, TCSANOW, &original_mode);
 		original_flags = fcntl(0, F_SETFL, original_flags);
-	}
-}
-
-void screen_demensions(){
-	struct winsize wbuf;
-
-	if(ioctl(0, TIOCGWINSZ, &wbuf) != -1){
-		ws_row = wbuf.ws_row;
-		ws_col = wbuf.ws_col;
 	}
 }
