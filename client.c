@@ -39,7 +39,7 @@ int main(int ac, char *av[])
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
 	
-	read(sock_id, message, strlen(message));
+	read(sock_id, message, sizeof(message));
 	printf("read: %s\n", message);
 
 	close(sock_id);
