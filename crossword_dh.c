@@ -55,7 +55,7 @@ void main(){
 
 void first_page(){
 	char title[] = "Cross Word";
-	char *menu[] = {"[1] game start","[2] game exit"};
+	char *menu[] = {"[1] game start","[2] game description","[3] game exit"};
 	//char menu2[] = "2. game exit";
 	char *choose[] = {"[1] 1p","[2] 2p"};
 	int key, cur, dir_r,dir_c,i;
@@ -81,7 +81,7 @@ void first_page(){
 	cur = dir_r;
 
 	while(1){
-		for(i = 0;i<2;i++){
+		for(i = 0;i<3;i++){
 			move(dir_r+i*2,dir_c);
 			if(i*2+dir_r == cur) attron(A_REVERSE);
 			printw("%s",menu[i]);
@@ -92,10 +92,10 @@ void first_page(){
 
 		switch(key = getch()){
 			case KEY_DOWN:
-				if(cur == dir_r) cur+=2;
+				if(cur != dir_r+4) cur+=2;
 				break;
 			case KEY_UP:
-				if(cur == dir_r+2) cur-=2;
+				if(cur != dir_r) cur-=2;
 				break;
 			default:
 				break;
