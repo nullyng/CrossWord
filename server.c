@@ -13,7 +13,7 @@ int main(int ac, char *av[])
 {
 	struct sockaddr_in serv_addr, clnt_addr;
 	int serv_sock, sock_fd1, sock_fd2, value1, value2, res;
-	char message1[BUFSIZ] = "hello", message2[BUFSIZ];
+	char message1[] = "hello", message2[BUFSIZ];
 	//char send1[] = "hi, i'm server. you're sock_fd1\n";
 	//char send2[] = "hi, i'm server. you're sock_fd2\n";
 	int s1, s2;
@@ -45,7 +45,7 @@ int main(int ac, char *av[])
 	//	oops("accept");
 	printf("successfully connected!\n");	
 
-	write(sock_fd1, message1, strlen(message1)+1);
+	write(sock_fd1, message1, strlen(message1));
 
 	close(sock_fd1);
 	close(sock_fd2);
