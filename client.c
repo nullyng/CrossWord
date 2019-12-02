@@ -11,7 +11,6 @@
 #define oops(msg) { perror(msg); exit(1); }
 
 int sock_id;
-//void *receive();
 
 int main(int ac, char *av[])
 {
@@ -20,7 +19,7 @@ int main(int ac, char *av[])
 	char message[BUFSIZ];
 	int messlen;
 	pthread_t t;
-	int result;
+	int res;
 
 	if(ac != 3)
 	{
@@ -28,12 +27,10 @@ int main(int ac, char *av[])
 		exit(1);
 	}
 
-	// get a socket
 	sock_id = socket(PF_INET, SOCK_STREAM, 0);
 	if(sock_id == -1)
 		oops("socket");
 
-	// connet to server
 	memset(&servadd, 0, sizeof(servadd));
 	servadd.sin_family = AF_INET;
 	servadd.sin_addr.s_addr = inet_addr(av[1]); // ip
@@ -41,41 +38,11 @@ int main(int ac, char *av[])
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
-
-	//pthread_create(&t, NULL, receive, NULL);
-	// transfer data from server, then hangup
-	while(1)
-	{	
-		fgets(message, BUFSIZ, stdin); // 메세지 입력
-
-		if(strcmp(message, "quit") == 0) // quit일 때 break
-			break;
-
-		send(sock_id, message, strlen(message), 0);	// 서버로 메세지 보냄
-		result = recv(sock_id, message, BUFSIZ-1, 0);
-		message[result] = 0;
-
-		printf("Message from server: %s\n", message);
-	}
-	//pthread_join(t, (void *)&result);
+	
+	read(sock_id, message, strlen(message));
+	printf("read: %s\n", message);
 
 	close(sock_id);
-
+	
 	return 0;
 }
-
-/*void *receive()
-{
-	char msg[BUFSIZ];
-	int value;
-
-	while(1)
-	{
-		value = recv(sock_id, msg, strlen(msg), MSG_DONTWAIT);
-
-		if(value != -1)
-		{
-			printf("receive: %s\n", msg);
-		}
-	}
-}*/
