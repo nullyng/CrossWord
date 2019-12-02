@@ -43,7 +43,7 @@ void main(){
 	clear();
 
 	first_page();
-	crossword_base(); // 일단 1p일 때 넘어가게 만듦.
+	crossword_base();
 	select_action_page();	
 
 	if(getchar()){
