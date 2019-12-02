@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <pthread.h>
 
 #define HOSTNAME 123 
 #define PORT 123
@@ -152,7 +153,7 @@ void player2()
 
 	if(connect(sock_id, (struct sokaddr *)&servadd, sizeof(servadd))!=0)
 		oops("connect");
-
+	
 }
 
 void screen_demensions()
