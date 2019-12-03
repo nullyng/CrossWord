@@ -53,6 +53,7 @@ int cnt_down = 0;
 int flag = 0; //sumbit signal
 //pthread_mutex_t counter_lock1 = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t counter_lock2 = PTHREAD_MUTEX_INITIALIZER;
+pthread_t t1;
 pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
 int ws_row, ws_col; // window size
 char buf[20];
@@ -178,7 +179,6 @@ void player2()
 	int i = 0;
 	char *temp[3];
 	struct info *data;
-	pthread_t t1;
 
 	clear();
 
@@ -195,6 +195,7 @@ void player2()
 		oops("connect");
 
 	pthread_create(&t1, NULL, thread_loop,NULL);
+
 }
 
 void thread_loop(void){
@@ -209,7 +210,7 @@ void thread_loop(void){
 		temp[i] = strtok(buf," ");
 		while(temp[i]!=NULL)
 			temp[++i]=strtok(NULL," ");
-		
+
 		sptintf(data->input_s,"%s %s",temp[1],temp[2]);
 		data->selection = atoi(temp[0]);
 
@@ -445,16 +446,18 @@ void add_page1(int selection){
 			return;
 		}
 
-		if(selection == 1){ // Across
-			if(strcmp(across[number], pass) == 0){
-				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
-				write(sock_id,sendstr,strlen(sendstr)+1);
+		if(t1!=NULL){
+			if(selection == 1){ // Across
+				if(strcmp(across[number], pass) == 0){
+					sprintf(sendstr,"%s %s",(char)selection,input->input_s);
+					write(sock_id,sendstr,strlen(sendstr)+1);
+				}
 			}
-		}
-		else{ // Down
-			if(strcmp(down[number], pass) == 0){
-				sprintf(sendstr,"%s %s",(char)selection,input->input_s);
-				write(sock_id,sendstr,strlen(sendstr)+1);
+			else{ // Down
+				if(strcmp(down[number], pass) == 0){
+					sprintf(sendstr,"%s %s",(char)selection,input->input_s);
+					write(sock_id,sendstr,strlen(sendstr)+1);
+				}
 			}
 		}
 		data->selection = selection;
