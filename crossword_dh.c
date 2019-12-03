@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <string.h>
+#include <signal.h>
 
 void edge(); // 게임화면  테두리
 void crossword_base();
@@ -36,6 +37,9 @@ int cnt_across = 0; // total 12
 int cnt_down = 0; // total 10
 
 void main(){
+	void ctrl_c(int); // declare the handler
+	signal(SIGINT, ctrl_c); // install the handler
+
 	tty_mode(0); // save original mode
 	set_cr_noecho_mode(); // canonical, echo mode OFF
 	//set_nodelay_mode(); // blocking OFF
@@ -583,3 +587,8 @@ void tty_mode(int how){ // restore original mode
 		original_flags = fcntl(0, F_SETFL, original_flags);
 	}
 }
+
+void ctrl_c(int signum){
+	exit_page();
+}
+
