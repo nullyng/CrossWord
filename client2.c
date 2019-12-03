@@ -10,6 +10,11 @@
 
 #define oops(msg) { perror(msg); exit(1); }
 
+typedef struct info{
+	int selection;
+	char *input;
+};
+
 int sock_id;
 
 int main(int ac, char *av[])
@@ -21,6 +26,8 @@ int main(int ac, char *av[])
 	pthread_t t;
 	int res;
 	char str[BUFSIZ];
+	char *temp[3];
+	struct info *data;
 
 	if(ac != 3)
 	{
@@ -39,20 +46,22 @@ int main(int ac, char *av[])
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
-<<<<<<< HEAD
+
 	while(1){
+		gets(str);
 		if(strcmp(str,"break")==0)
 			break;	
-		gets(str);
 		write(sock_id,str,strlen(str)+1);
 		read(sock_id, message, sizeof(message));
+		temp[i] = strtok(
+		while(temp[i] != NULL){
+		
+		}
 		printf("read: %s\n", message);
 	}
-=======
 	
 	read(sock_id, message, sizeof(message));
 	printf("read: %s\n", message);
->>>>>>> 0dd9d3471319db0f0dc527e0981f75952026aecc
 
 	close(sock_id);
 	
