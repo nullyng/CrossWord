@@ -42,12 +42,15 @@ int main(int ac, char *av[])
 	sock_fd1 = accept(serv_sock, NULL, NULL); // accept은 blocking
 	//sock_fd2 = accept(serv_sock, NULL, NULL); // 2개가 들어올 때까지 기다림
 	//if(sock_fd1 == -1 || sock_fd2 == -1)
-	//	oops("accept");
+	//		oops("accept");
+
 	printf("successfully connected!\n");	
-
-	write(sock_fd1, message1, strlen(message1)+1);
-
+	
+	while(1){
+		read(sock_fd1,message2,sizeof(message2));
+		write(sock_fd1, message2, strlen(message2)+1);
+	}
 	close(sock_fd1);
-	close(sock_fd2);
+	//close(sock_fd2);
 	close(serv_sock);
 }

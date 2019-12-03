@@ -20,6 +20,7 @@ int main(int ac, char *av[])
 	int messlen;
 	pthread_t t;
 	int res;
+	char str[BUFSIZ];
 
 	if(ac != 3)
 	{
@@ -38,9 +39,14 @@ int main(int ac, char *av[])
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
-	
-	read(sock_id, message, strlen(message));
-	printf("read: %s\n", message);
+	while(1){
+		if(strcmp(str,"break")==0)
+			break;	
+		gets(str);
+		write(sock_id,str,strlen(str)+1);
+		read(sock_id, message, sizeof(message));
+		printf("read: %s\n", message);
+	}
 
 	close(sock_id);
 	
