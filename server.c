@@ -13,7 +13,7 @@ int main(int ac, char *av[])
 {
 	struct sockaddr_in serv_addr, clnt_addr;
 	int serv_sock, sock_fd1, sock_fd2, value1, value2, res;
-	char message1[BUFSIZ] = "hello", message2[BUFSIZ];
+	char message1[] = "hello", message2[BUFSIZ];
 	//char send1[] = "hi, i'm server. you're sock_fd1\n";
 	//char send2[] = "hi, i'm server. you're sock_fd2\n";
 	int s1, s2;
@@ -42,7 +42,14 @@ int main(int ac, char *av[])
 	sock_fd1 = accept(serv_sock, NULL, NULL); // accept은 blocking
 	//sock_fd2 = accept(serv_sock, NULL, NULL); // 2개가 들어올 때까지 기다림
 	//if(sock_fd1 == -1 || sock_fd2 == -1)
+<<<<<<< HEAD
 	//		oops("accept");
+=======
+	//	oops("accept");
+	printf("successfully connected!\n");	
+
+	write(sock_fd1, message1, strlen(message1));
+>>>>>>> 0dd9d3471319db0f0dc527e0981f75952026aecc
 
 	printf("successfully connected!\n");	
 	
