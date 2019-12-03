@@ -12,6 +12,8 @@
 
 int sock_id;
 
+void *receive();
+
 int main(int ac, char *av[])
 {
 	struct sockaddr_in servadd;
@@ -39,29 +41,38 @@ int main(int ac, char *av[])
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
-<<<<<<< HEAD
-	while(1){
-=======
 	
+	pthread_create(&t, NULL, receive, NULL);
+
 	while(1)
 	{
->>>>>>> fb4088cd21e6e51560ce1c3f8477a0f569dbf100
+		gets(str);
+
 		if(strcmp(str,"break")==0)
 			break;	
-		gets(str);
-		write(sock_id,str,strlen(str)+1);
+
+		write(sock_id, str, strlen(str)+1);
 		//read(sock_id, message, sizeof(message));
 		//printf("read: %s\n", message);
 	}
 	
-<<<<<<< HEAD
-	read(sock_id, message, sizeof(message));
-	printf("read: %s\n", message);
-
-
-=======
->>>>>>> fb4088cd21e6e51560ce1c3f8477a0f569dbf100
+	pthread_join(t, NULL);
 	close(sock_id);
 	
 	return 0;
+}
+	
+void *receive()
+{
+	while(1)
+	{
+		char message[BUFSIZ];
+
+		recv(sock_id, message, sizeof(message), 0);
+
+		if(strcmp(message, "break") == 0)
+			break;
+
+		printf("receive: %s\n", message);
+	}
 }
