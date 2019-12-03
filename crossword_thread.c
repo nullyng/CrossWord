@@ -192,7 +192,6 @@ void player2()
 		oops("connect");
 
 	pthread_create(&t1, NULL, thread_loop,NULL);
-
 }
 
 void *thread_loop(void){
@@ -200,18 +199,18 @@ void *thread_loop(void){
 	char *temp[3];
 	struct info data;	
 
-	while(1){
-
+	while(1)
+	{
 		char buf[BUFSIZ];
 
 		i = 0;
 		read(sock_id,buf,sizeof(buf));
 
 		temp[i] = strtok(buf," ");
-		while(temp[i]!=NULL)
-			temp[++i]=strtok(NULL," ");
+		while(temp[i] != NULL)
+			temp[++i] = strtok(NULL," ");
 
-		sprintf(data.input_s,"%s %s",temp[1],temp[2]);
+		sprintf(data.input_s, "%s %s", temp[1], temp[2]);
 		data.selection = atoi(temp[0]);
 
 		add_page2(data);	
@@ -453,13 +452,13 @@ void add_page1(int selection){
 		if(t1!='\0'){
 			if(selection == 1){ // Across
 				if(strcmp(across[number], pass) == 0){
-					sprintf(sendstr,"%d %s\n",selection,input);
+					sprintf(sendstr,"%d %s",selection,input);
 					write(sock_id,sendstr,strlen(sendstr)+1);
 				}
 			}
 			else{ // Down
 				if(strcmp(down[number], pass) == 0){
-					sprintf(sendstr,"%d %s\n",selection,input);
+					sprintf(sendstr,"%d %s",selection,input);
 					write(sock_id,sendstr,strlen(sendstr)+1);
 				}
 			}
@@ -473,11 +472,11 @@ void add_page1(int selection){
 void add_page2(struct info input){
 	char *across[] = {"", "grill", "", "", "dig", "",  "our", "again", "ant", "dime", "",  "snow", "", "",  "can", "olive", "", "owl", "tar", "lolly"};
 	char *down[] = {"", "guard", "IRA", "long", "drain", "get", "", "", "", "",  "minor", "", "weedy", "roll", "cat", "", "ill"};
-	pthread_mutex_lock(&input_lock);
 	int number; // Across, Down의 몇 번째 단어인가?
 	number = atoi(input.input_s);
 	char *pass; // input에서 word만을 뗀 것
 
+	pthread_mutex_lock(&input_lock);
 	if(number < 10)	pass = input.input_s+2;
 	else pass = input.input_s+3;
 
