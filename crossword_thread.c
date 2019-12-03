@@ -211,7 +211,7 @@ void thread_loop(void){
 		while(temp[i]!=NULL)
 			temp[++i]=strtok(NULL," ");
 
-		sptintf(data->input_s,"%s %s",temp[1],temp[2]);
+		sprintf(data->input_s,"%s %s",temp[1],temp[2]);
 		data->selection = atoi(temp[0]);
 
 		add_page(data);	

@@ -28,6 +28,7 @@ int main(int ac, char *av[])
 	char str[BUFSIZ];
 	char *temp[3];
 	struct info *data;
+	int i = 0;
 
 	if(ac != 3)
 	{
@@ -50,18 +51,25 @@ int main(int ac, char *av[])
 	while(1){
 		gets(str);
 		if(strcmp(str,"break")==0)
-			break;	
+			break;
+		//write	
 		write(sock_id,str,strlen(str)+1);
+		//read
 		read(sock_id, message, sizeof(message));
-		temp[i] = strtok(
+
+		printf("read : %s\n",message);
+		temp[i] = strtok(message," ");
 		while(temp[i] != NULL){
-		
+			printf("token %d: %s\n",i,temp[i]);
+			temp[++i]=strtok(NULL," ");
 		}
-		printf("read: %s\n", message);
+
+		sprintf(data->input,"%s %s",temp[1],temp[2]);
+		data->selection = atoi(temp[0]);
+
+		printf("struct char: %s , selection: %d",data->input,data->selection);
+
 	}
-	
-	read(sock_id, message, sizeof(message));
-	printf("read: %s\n", message);
 
 	close(sock_id);
 	
