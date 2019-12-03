@@ -26,6 +26,7 @@ int main(int ac, char *av[])
 	struct hostent *hp;
 	pthread_t t;
 	char str[BUFSIZ];
+	int num;
 	
 	if(ac != 3)
 	{
@@ -48,10 +49,14 @@ int main(int ac, char *av[])
 	pthread_create(&t, NULL, receive, NULL);
 
 	while(1)
-	{
+	{	
+		scanf("%d",&num);
 		gets(str);
 		if(strcmp(str,"break")==0)
 			break;
+
+		sprintf(str,"%d %s",num, str);
+		sprintf(str,"%s\n",str);
 		//write	
 		write(sock_id,str,strlen(str)+1);
 	}

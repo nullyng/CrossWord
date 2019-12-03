@@ -16,8 +16,8 @@
 #include <sys/ioctl.h>
 
 #define oops(msg) {perror(msg); exit(1);}
-#define HOSTNAME "172.31.39.220"
-#define PORT 1234
+#define HOSTNAME "54.180.7.174"
+#define PORT 25044
 
 struct info {
 	int selection;
@@ -60,7 +60,6 @@ pthread_t t1;
 int sock_id;
 pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
 int ws_row, ws_col; // window size
-char buf[20];
 
 void main(){
 	tty_mode(0); // save original mode
@@ -166,7 +165,7 @@ void first_page(){
 	else
 		exit_page();
 
-	if(cur = dir_r+4)
+	if(cur == dir_r+4)
 		player2();
 
 	// 1p, 2p일 때 어떻게 할 것인가?? 일단 둘 다 게임화면 뜨게 해놨음
@@ -202,8 +201,11 @@ void *thread_loop(void){
 	struct info data;	
 
 	while(1){
+
+		char buf[BUFSIZ];
+
 		i = 0;
-		read(sock_id,buf,strlen(buf));
+		read(sock_id,buf,sizeof(buf));
 
 		temp[i] = strtok(buf," ");
 		while(temp[i]!=NULL)
@@ -414,7 +416,7 @@ void add_page1(int selection){
 
 	char *sendstr;
 	struct info data;
-	
+
 	while(1){
 		clear_box();
 
@@ -443,19 +445,21 @@ void add_page1(int selection){
 			select_across_down_page();
 			return;
 		}
-		
+
 		number = atoi(input);
+		if(number < 10)	pass = input+2;
+		else pass = input+3;
 
 		if(t1!='\0'){
 			if(selection == 1){ // Across
 				if(strcmp(across[number], pass) == 0){
-					sprintf(sendstr,"%d %s",selection,data.input_s);
+					sprintf(sendstr,"%d %s\n",selection,input);
 					write(sock_id,sendstr,strlen(sendstr)+1);
 				}
 			}
 			else{ // Down
 				if(strcmp(down[number], pass) == 0){
-					sprintf(sendstr,"%d %s",selection,data.input_s);
+					sprintf(sendstr,"%d %s\n",selection,input);
 					write(sock_id,sendstr,strlen(sendstr)+1);
 				}
 			}
