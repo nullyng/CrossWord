@@ -201,9 +201,9 @@ void player2()
 void thread_loop(void){
 	int i;
 	char *temp[3];
-	struct info *data;	
+	struct info data;	
 
-	while(flag !=1){
+	while(1){
 		i = 0;
 		read(sock_id,buf,strlen(buf));
 
@@ -211,10 +211,10 @@ void thread_loop(void){
 		while(temp[i]!=NULL)
 			temp[++i]=strtok(NULL," ");
 
-		sprintf(data->input_s,"%s %s",temp[1],temp[2]);
-		data->selection = atoi(temp[0]);
+		sprintf(data.input_s,"%s %s",temp[1],temp[2]);
+		data.selection = atoi(temp[0]);
 
-		add_page(data);	
+		add_page2(data);	
 	}
 }
 
@@ -421,7 +421,7 @@ void add_page1(int selection){
 		clear_box();
 
 		if(cnt_across == 12 && cnt_down == 10){
-			flag = 1;
+			pthread_cancel(t1);
 			move(20,58); printw("You filled all blanks. Please enter 'back' and submit!");
 		}
 		else{
@@ -466,10 +466,10 @@ void add_page1(int selection){
 	}
 }
 
-void add_page2(struct info *input){
+void add_page2(struct info input){
 	pthread_mutex_lock(&input_lock);
 	int number; // Across, Down의 몇 번째 단어인가?
-	number = atoi(input->input_s[0]);
+	number = atoi(input.input_s[0]);
 	char *pass; // input에서 word만을 뗀 것
 
 	if(number < 10)	pass = input->input_s+2;
