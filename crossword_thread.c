@@ -212,7 +212,7 @@ void *thread_loop(void){
 
 		sprintf(data.input_s, "%s %s", temp[1], temp[2]);
 		data.selection = atoi(temp[0]);
-
+		flag = 1;
 		add_page2(data);	
 	}
 }
@@ -482,11 +482,14 @@ void add_page2(struct info input){
 
 	if(input.selection == 1){ // Across
 		if(strcmp(across[number], pass) == 0){
-			clear_box();
-			move(20,58); printw("Yes! Correct answer!");
-			move(LINES-1, COLS-1);
-			refresh();
-			sleep(1);
+			if(flag == 0)
+			{
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
 
 			cnt_across++;
 
@@ -515,11 +518,14 @@ void add_page2(struct info input){
 
 	else{ // Down
 		if(strcmp(down[number], pass) == 0){
-			clear_box();
-			move(20,58); printw("Yes! Correct answer!");
-			move(LINES-1, COLS-1);
-			refresh();
-			sleep(1);
+			if(flag == 0)
+			{
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
 
 			cnt_down++;
 
@@ -544,6 +550,7 @@ void add_page2(struct info input){
 		}
 	}
 	pthread_mutex_unlock(&input_lock);
+	flag = 0;
 }
 void add_across(int x, int y, char *input){
 	for(int i = 0; i < strlen(input); i++){
