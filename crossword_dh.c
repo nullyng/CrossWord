@@ -60,9 +60,10 @@ void main(){
 
 void first_page(){
 	char title[] = "Cross Word";
-	char *menu[] = {"[1] game start","[2] game info","[3] game exit"};
-	//char menu2[] = "2. game exit";
-	char *choose[] = {"[1] 1p","[2] 2p"};
+	char *menu[] = {"     [1] game start     ","     [2] game info      ","     [3] game exit      "};
+	char line[] = "************************";
+	char blank[] = "                        ";
+	char *choose[] = {"         [1] 1p         ","         [2] 2p         "};
 	int key, cur, dir_r,dir_c,i;
 
 	if(has_colors())
@@ -80,15 +81,20 @@ void first_page(){
 	refresh();
 	sleep(1);
 
+	move(15,49);
+	addstr(line);
+	move(19,49);
+	addstr(line);
+
 	keypad(stdscr,TRUE);
 	dir_r = 16;
-	dir_c = 54;
+	dir_c = 49;
 	cur = dir_r;
 
 	while(1){
 		for(i = 0;i<3;i++){
-			move(dir_r+i*2,dir_c);
-			if(i*2+dir_r == cur) attron(A_REVERSE);
+			move(dir_r+i*1,dir_c);
+			if(i*1+dir_r == cur) attron(A_REVERSE);
 			printw("%s",menu[i]);
 			attroff(A_REVERSE);
 			move(LINES-1, COLS -1);
@@ -97,10 +103,10 @@ void first_page(){
 
 		switch(key = getch()){
 			case KEY_DOWN:
-				if(cur != dir_r+4) cur+=2;
+				if(cur != dir_r+2) cur+=1;
 				break;
 			case KEY_UP:
-				if(cur != dir_r) cur-=2;
+				if(cur != dir_r) cur-=1;
 				break;
 			default:
 				break;
@@ -111,28 +117,37 @@ void first_page(){
 	clear();
 	edge();	
 
-	if(cur == dir_r+2) info_page();
+	if(cur == dir_r+1) info_page();
 
-	else if(cur == dir_r){
-		dir_r -=2;
-		dir_c = 58;
+	else if(cur == dir_r){ // game start
+		move(12,49);
+		addstr(line);
+		move(19,49);
+		addstr(line);
+
+		dir_r -=3;
+		dir_c = 49;
 		cur = dir_r;
 
 		while(1){
 			for(i = 0;i<2;i++){
-				move(dir_r+i*4,dir_c);
-				if(i*4+dir_r == cur) attron(A_REVERSE);
+				move(dir_r+i*3,dir_c);
+				if(i*3+dir_r == cur) attron(A_REVERSE);
+				addstr(blank);
+				move(dir_r+i*3+1,dir_c);
 				printw("%s",choose[i]);
+				move(dir_r+i*3+2,dir_c);
+				addstr(blank);
 				attroff(A_REVERSE);
 				move(LINES-1,COLS-1);
 				refresh();
 			}
 			switch(key = getch()){
 				case KEY_DOWN:
-					if(cur == dir_r) cur += 4;
+					if(cur == dir_r) cur += 3;
 					break;
 				case KEY_UP:
-					if(cur == dir_r+4) cur -=4;
+					if(cur == dir_r+3) cur -=3;
 					break;
 				default:
 					break;
@@ -300,7 +315,7 @@ void add_blank(int x, int y, int n){
 void select_action_page(){
 	int key;
 	int selection = 1;
-	char *selections[] = {"[1] Add", "[2] Exit"};
+	char *selections[] = {"[1] Add ", "[2] Exit"};
 
 	clear_box();
 
@@ -347,7 +362,7 @@ void select_across_down_page() {
 	int i;
 	int key;
 	int selection = 1; // 1:Across, 2:Down, 3:Submit
-	char *selections[] = { "[1] Across", "[2] Down", "[3] Submit", "[4] Exit" };
+	char *selections[] = { "[1] Across", "[2] Down  ", "[3] Submit", "[4] Exit  " };
 
 	clear_box();
 
