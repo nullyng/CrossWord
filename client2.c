@@ -10,26 +10,23 @@
 
 #define oops(msg) { perror(msg); exit(1); }
 
-typedef struct info{
+typedef struct info
+{
 	int selection;
-	char *input;
+	char input[BUFSIZ];
 };
 
 int sock_id;
+
+void *receive();
 
 int main(int ac, char *av[])
 {
 	struct sockaddr_in servadd;
 	struct hostent *hp;
-	char message[BUFSIZ];
-	int messlen;
 	pthread_t t;
-	int res;
 	char str[BUFSIZ];
-	char *temp[3];
-	struct info *data;
-	int i = 0;
-
+	
 	if(ac != 3)
 	{
 		fprintf(stderr, "usage: %s ip port", av[0]);
@@ -48,30 +45,47 @@ int main(int ac, char *av[])
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd)) != 0)
 		oops("connect");
 
-	while(1){
+	pthread_create(&t, NULL, receive, NULL);
+
+	while(1)
+	{
 		gets(str);
 		if(strcmp(str,"break")==0)
 			break;
 		//write	
 		write(sock_id,str,strlen(str)+1);
-		//read
-		read(sock_id, message, sizeof(message));
-
-		printf("read : %s\n",message);
-		temp[i] = strtok(message," ");
-		while(temp[i] != NULL){
-			printf("token %d: %s\n",i,temp[i]);
-			temp[++i]=strtok(NULL," ");
-		}
-
-		sprintf(data->input,"%s %s",temp[1],temp[2]);
-		data->selection = atoi(temp[0]);
-
-		printf("struct char: %s , selection: %d",data->input,data->selection);
-
 	}
 
 	close(sock_id);
 	
 	return 0;
+}
+
+void *receive()
+{
+	int i = 0;
+	struct info data;
+	char *temp[3];
+
+	while(1)
+	{
+		char message[BUFSIZ];
+
+		recv(sock_id, message, sizeof(message), 0);
+
+		printf("read : %s\n",message);
+		temp[i] = strtok(message," ");
+	
+		while(temp[i] != NULL)
+		{
+			printf("token %d: %s\n",i,temp[i]);
+			temp[++i]=strtok(NULL," ");
+		}
+
+		sprintf(data.input,"%s %s",temp[1],temp[2]);
+		data.selection = atoi(temp[0]);
+
+		printf("struct char: %s , selection: %d\n",data.input, data.selection);
+		i=0;
+	}
 }
