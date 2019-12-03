@@ -192,6 +192,7 @@ void info_page(){
 void crossword_base() {
 	edge();
 
+	// 좌측: 퍼즐
 	//                       6    11   16   21   26   31   36   41   46
 	move(3, 5);	printw("*--------------------------------------------*");
 	move(4, 5);	printw("|1   |    |2   |    |3   |    |4   |    |5   |"); add_blank(4, 31, 1);
@@ -222,6 +223,7 @@ void crossword_base() {
 	move(29, 5);	printw("|    |    |    |    |    |    |    |    |    |"); add_blank(29, 21, 1);
 	move(30, 5);	printw("*--------------------------------------------*");
 
+	// 우측 상단: 낱말 설명
 	attron(A_BOLD | A_UNDERLINE);
 	move(3, 56);	printw("Across");
 	attroff(A_BOLD | A_UNDERLINE);
@@ -252,18 +254,12 @@ void crossword_base() {
 	move(13, 87);	printw("14. Feline");
 	move(14, 87);	printw("16. Sick");
 
+	// 우측 하단: 답변 박스
 	attron(A_BOLD);
 	move(19, 56);	printw("*************************************************************");
-	move(20, 56);	printw("*                                                           *");
-	move(21, 56);	printw("*                                                           *");
-	move(22, 56);	printw("*                                                           *");
-	move(23, 56);	printw("*                                                           *");
-	move(24, 56);	printw("*                                                           *");
-	move(25, 56);	printw("*                                                           *");
-	move(26, 56);	printw("*                                                           *");
-	move(27, 56);	printw("*                                                           *");
-	move(28, 56);	printw("*                                                           *");
-	move(29, 56);	printw("*                                                           *");
+	for(int i = 20; i <= 29; i++){
+		move(i, 56);	printw("*                                                           *");
+	}
 	move(30, 56);	printw("*************************************************************");
 	attroff(A_BOLD);
 

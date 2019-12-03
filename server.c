@@ -11,12 +11,9 @@
 
 int main(int ac, char *av[])
 {
-	struct sockaddr_in serv_addr, clnt_addr;
-	int serv_sock, sock_fd1, sock_fd2, value1, value2, res;
+	struct sockaddr_in serv_addr;
+	int serv_sock, sock_fd1, sock_fd2, value1, value2;
 	char message1[BUFSIZ], message2[BUFSIZ];
-	//char send1[] = "hi, i'm server. you're sock_fd1\n";
-	//char send2[] = "hi, i'm server. you're sock_fd2\n";
-	int s1, s2;
 
 	if(ac != 2)
 	{
@@ -42,8 +39,8 @@ int main(int ac, char *av[])
 	sock_fd1 = accept(serv_sock, NULL, NULL); // accept은 blocking
 	sock_fd2 = accept(serv_sock, NULL, NULL); // 2개가 들어올 때까지 기다림
 	if(sock_fd1 == -1 || sock_fd2 == -1)
-			oops("accept");
-	printf("successfully connected!\n"); // client 2개 성공적으로 연결	
+		oops("accept");
+	printf("successfully connected!\n");	
 	
 	while(1)
 	{
@@ -60,8 +57,6 @@ int main(int ac, char *av[])
 			printf("%d send: %s\n", sock_fd2, message2);
 			write(sock_fd1, message2, strlen(message2)+1);
 		}
-		//read(sock_fd1,message2,sizeof(message2));
-		//write(sock_fd1, message2, strlen(message2)+1);
 	}
 	close(sock_fd1);
 	close(sock_fd2);
