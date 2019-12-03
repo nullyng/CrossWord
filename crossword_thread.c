@@ -17,7 +17,7 @@
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174"
-#define PORT 25044
+#define PORT 25043
 
 struct info {
 	int selection;
@@ -414,7 +414,7 @@ void add_page1(int selection){
 	char *pass; // input에서 word만을 뗀 것
 	int i;
 
-	char *sendstr;
+	char sendstr[BUFSIZ];
 	struct info data;
 
 	while(1){
