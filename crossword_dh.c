@@ -17,8 +17,8 @@
 #include <sys/ioctl.h>
 
 #define oops(msg) {perror(msg); exit(1);}
-#define HOSTNAME "172.31.39.220"
-#define PORT 1234
+#define HOSTNAME "54.180.7.174"
+#define PORT 25043
 
 struct info {
 	int selection;
@@ -180,7 +180,7 @@ void first_page(){
 	}
 	else exit_page();
 
-	if(cur == dir_r+4)
+	if(cur == dir_r+3)
 		player2();
 
 	clear();
@@ -258,7 +258,7 @@ void *thread_loop(void){
 
 	while(1)
 	{
-		char buf[500];
+		char buf[BUFSIZ];
 
 		i=0;
 		read(sock_id, buf,sizeof(buf));
@@ -535,22 +535,21 @@ void add_page2(struct info input){
 	int number;
 	char *pass;
 
-	number = atoi(input.input_s);
+	pthread_mutex_lock(&input_lock);
 
+	number = atoi(input.input_s);
 	if(number < 10)	pass = input.input_s+2;
 	else pass = input.input_s+3;
-
-	pthread_mutex_lock(&input_lock);
 
 	if(input.selection == 1){ // Across
 		if(strcmp(across[number], pass) == 0){
 			if(flag == 0)
 			{
-			clear_box();
-			move(20,58); printw("Yes! Correct answer!");
-			move(LINES-1, COLS-1);
-			refresh();
-			sleep(1);
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
 			}
 			if(cnt_across < 12) cnt_across++; // 12 이상으로 못 올라가게
 
@@ -581,11 +580,11 @@ void add_page2(struct info input){
 		if(strcmp(down[number], pass) == 0){
 			if(flag == 0)
 			{
-			clear_box();
-			move(20,58); printw("Yes! Correct answer!");
-			move(LINES-1, COLS-1);
-			refresh();
-			sleep(1);
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
 			}
 			if(cnt_down < 10) cnt_down++; // 10 이상으로 못 올라가게
 
