@@ -18,7 +18,7 @@
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174"
-#define PORT 25043
+#define PORT 25044
 
 struct info {
 	int selection;
@@ -177,11 +177,10 @@ void first_page(){
 			if(key == 10)
 				break;
 		}		
+		if(cur == dir_r+3)
+			player2();
 	}
 	else exit_page();
-
-	if(cur == dir_r+3)
-		player2();
 
 	clear();
 
@@ -255,6 +254,7 @@ void *thread_loop(void){
 	int i;
 	char *temp[3];
 	struct info data;
+	char consig[200];
 
 	while(1)
 	{
@@ -608,8 +608,8 @@ void add_page2(struct info input){
 			sleep(1);
 		}
 	}
-	pthread_mutex_unlock(&input_lock);
 	flag = 0;
+	pthread_mutex_unlock(&input_lock);
 }
 
 void add_across(int x, int y, char *input){
