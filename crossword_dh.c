@@ -9,6 +9,21 @@
 #include <ctype.h>
 #include <string.h>
 #include <signal.h>
+#include <pthread.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+
+#define oops(msg) {perror(msg); exit(1);}
+#define HOSTNAME "172.31.39.220"
+#define PORT 1234
+
+struct info {
+	int selection;
+	char input_s[20];
+};
 
 void edge(); // 게임화면  테두리
 void crossword_base();
@@ -18,11 +33,14 @@ void clear_box();
 void player1();
 void player2();
 
+void *thread_loop();
+
 void first_page();
 void info_page();
 void select_action_page();
 void select_across_down_page();
-void add_page(int);
+void add_page1(int);
+void add_page2(struct info);
 void add_across(int, int,  char*);
 void add_down(int, int,  char*);
 
@@ -35,6 +53,10 @@ void tty_mode(int);
 
 int cnt_across = 0; // total 12
 int cnt_down = 0; // total 10
+int flag = 0; //submit signal
+pthread_t t1;
+int sock_id;
+pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void main(){
 	void ctrl_c(int); // declare the handler
@@ -158,11 +180,12 @@ void first_page(){
 	}
 	else exit_page();
 
-	//	if(cur = dir_r+4)
-	//		player2();
+	if(cur == dir_r+4)
+		player2();
 
-	// 1p, 2p일 때 어떻게 할 것인가?? 일단 둘 다 게임화면 뜨게 해놨음
 	clear();
+
+	//이다음 메인에서 게임시작으로 넘어감
 }
 
 void info_page(){
@@ -177,7 +200,7 @@ void info_page(){
 		"2018111947 Kim Dohee",
 		"2018113910 Kim Juyoung",
 		"2018111138 Baek Hyewon"};
-	
+
 	attron(A_BOLD|A_UNDERLINE);
 	move(10, 61-strlen(info[0])/2);
 	addstr(info[0]);
@@ -206,6 +229,50 @@ void info_page(){
 	first_page();
 }
 
+void player2()
+{
+	struct sockaddr_in servadd;
+	struct hostent *hp;
+
+	clear();
+
+	sock_id = socket(AF_INET,SOCK_STREAM,0);
+	if(sock_id == -1)
+		oops("socket");
+
+	memset(&servadd, 0, sizeof(servadd));
+	servadd.sin_family = AF_INET;
+	servadd.sin_addr.s_addr = inet_addr(HOSTNAME);
+	servadd.sin_port = htons(PORT);
+
+	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd))!=0)
+		oops("connect");
+
+	pthread_create(&t1,NULL,thread_loop,NULL);
+}
+
+void *thread_loop(void){
+	int i;
+	char *temp[3];
+	struct info data;
+
+	while(1)
+	{
+		char buf[500];
+
+		i=0;
+		read(sock_id, buf,sizeof(buf));
+
+		temp[i] = strtok(buf," ");
+		while(temp[i] != NULL)
+			temp[++i] = strtok(NULL," ");
+
+		sprintf(data.input_s, "%s %s",temp[1],temp[2]);
+		data.selection = atoi(temp[0]);
+		flag = 1;
+		add_page2(data);
+	}
+}
 
 
 void crossword_base() {
@@ -392,18 +459,21 @@ void select_across_down_page() {
 			break;
 	}
 
-	if (selection == 1) add_page(1);
-	else if(selection == 2) add_page(2);
+	if (selection == 1) add_page1(1);
+	else if(selection == 2) add_page1(2);
 	else if(selection == 3) submit_page();
 	else exit_page();
 }
 
-void add_page(int selection){
+void add_page1(int selection){
 	int i;
 	char *across[] = {"0 empty", "grill", "2 empty", "3 empty", "dig", "5 empty",  "our", "again", "ant", "dime", "10 empty",  "snow", "12 empty", "13 empty",  "can", "olive", "16 empty", "owl", "tar", "lolly"};
 	char *down[] = {"0 empty", "guard", "IRA", "long", "drain", "get", "6 empty", "7 empty", "8 empty", "9 empty", "minor", "11 empty", "weedy", "roll", "cat", "15 empty", "ill"};
 	char input[20];
 	int number; // Across, Down의 몇 번째 단어인가?
+
+	char sendstr[500];
+	struct info data;
 
 	while(1){
 		clear_box();
@@ -441,73 +511,106 @@ void add_page(int selection){
 
 		number = atoi(input);
 		char *pass; // input에서 word만을 뗀 것
-		if(number < 10)	pass = input+2;
+		if(number<10) pass = input+2;
 		else pass = input+3;
 
-		if(selection == 1){ // Across
-			if(strcmp(across[number], pass) == 0){
-				clear_box();
-				move(20,58); printw("Yes! Correct answer!");
-				move(LINES-1, COLS-1);
-				refresh();
-				sleep(1);
-
-				if(cnt_across < 12) cnt_across++; // 12 이상으로 못 올라가게
-
-				// 퍼즐에 단어 추가하는 부분
-				if(number == 1) add_across(5,9,pass);
-				else if(number == 4) add_across(5,39,pass);
-				else if(number == 6) add_across(8,29,pass);
-				else if(number == 7) add_across(11,9,pass);
-				else if(number == 8) add_across(11,39,pass);
-				else if(number == 9) add_across(17,9,pass);
-				else if(number == 11) add_across(17,34,pass);
-				else if(number == 14) add_across(23,9,pass);
-				else if(number == 15) add_across(23,29,pass);
-				else if(number == 17) add_across(26,19,pass);
-				else if(number == 18) add_across(29,9,pass);
-				else if(number == 19) add_across(29,29,pass);
-			}
-			else{
-				clear_box();
-				move(20,58); printw("Wrong answer. Try again!");
-				move(LINES-1, COLS-1);
-				refresh();
-				sleep(1);
+		if(t1 != '\0'){
+			if((strcmp(across[number],pass) == 0)||(strcmp(down[number],pass)==0)){
+				sprintf(sendstr,"%d %s",selection,input);
+				write(sock_id,sendstr,strlen(sendstr)+1);
 			}
 		}
 
-		else{ // Down
-			if(strcmp(down[number], pass) == 0){
-				clear_box();
-				move(20,58); printw("Yes! Correct answer!");
-				move(LINES-1, COLS-1);
-				refresh();
-				sleep(1);
+		data.selection = selection;
+		strcpy(data.input_s,input);
+		add_page2(data);
+	}
 
-				if(cnt_down < 10) cnt_down++; // 10 이상으로 못 올라가게
 
-				// 퍼즐에 단어 추가하는 부분
-				if(number == 1) add_down(5,9,pass);
-				else if(number == 2) add_down(5,19,pass);
-				else if(number == 3) add_down(5,29,pass);
-				else if(number == 4) add_down(5,39,pass);
-				else if(number == 5) add_down(5,49,pass);
-				else if(number == 10) add_down(17,19,pass);
-				else if(number == 12) add_down(17,49,pass);
-				else if(number == 13) add_down(20,29,pass);
-				else if(number == 14) add_down(23,9,pass);
-				else if(number == 16) add_down(23,39,pass);
+}
+
+void add_page2(struct info input){
+	char *across[] = {"0 empty", "grill", "2 empty", "3 empty", "dig", "5 empty",  "our", "again", "ant", "dime", "10 empty",  "snow", "12 empty", "13 empty",  "can", "olive", "16 empty", "owl", "tar", "lolly"};
+	char *down[] = {"0 empty", "guard", "IRA", "long", "drain", "get", "6 empty", "7 empty", "8 empty", "9 empty", "minor", "11 empty", "weedy", "roll", "cat", "15 empty", "ill"};
+	int number;
+	char *pass;
+
+	number = atoi(input.input_s);
+
+	if(number < 10)	pass = input.input_s+2;
+	else pass = input.input_s+3;
+
+	pthread_mutex_lock(&input_lock);
+
+	if(input.selection == 1){ // Across
+		if(strcmp(across[number], pass) == 0){
+			if(flag == 0)
+			{
+			clear_box();
+			move(20,58); printw("Yes! Correct answer!");
+			move(LINES-1, COLS-1);
+			refresh();
+			sleep(1);
 			}
-			else{
-				clear_box();
-				move(20,58); printw("Wrong answer. Try again!");
-				move(LINES-1, COLS-1);
-				refresh();
-				sleep(1);
-			}
+			if(cnt_across < 12) cnt_across++; // 12 이상으로 못 올라가게
+
+			// 퍼즐에 단어 추가하는 부분
+			if(number == 1) add_across(5,9,pass);
+			else if(number == 4) add_across(5,39,pass);
+			else if(number == 6) add_across(8,29,pass);
+			else if(number == 7) add_across(11,9,pass);
+			else if(number == 8) add_across(11,39,pass);
+			else if(number == 9) add_across(17,9,pass);
+			else if(number == 11) add_across(17,34,pass);
+			else if(number == 14) add_across(23,9,pass);
+			else if(number == 15) add_across(23,29,pass);
+			else if(number == 17) add_across(26,19,pass);
+			else if(number == 18) add_across(29,9,pass);
+			else if(number == 19) add_across(29,29,pass);
+		}
+		else{
+			clear_box();
+			move(20,58); printw("Wrong answer. Try again!");
+			move(LINES-1, COLS-1);
+			refresh();
+			sleep(1);
 		}
 	}
+
+	else{ // Down
+		if(strcmp(down[number], pass) == 0){
+			if(flag == 0)
+			{
+			clear_box();
+			move(20,58); printw("Yes! Correct answer!");
+			move(LINES-1, COLS-1);
+			refresh();
+			sleep(1);
+			}
+			if(cnt_down < 10) cnt_down++; // 10 이상으로 못 올라가게
+
+			// 퍼즐에 단어 추가하는 부분
+			if(number == 1) add_down(5,9,pass);
+			else if(number == 2) add_down(5,19,pass);
+			else if(number == 3) add_down(5,29,pass);
+			else if(number == 4) add_down(5,39,pass);
+			else if(number == 5) add_down(5,49,pass);
+			else if(number == 10) add_down(17,19,pass);
+			else if(number == 12) add_down(17,49,pass);
+			else if(number == 13) add_down(20,29,pass);
+			else if(number == 14) add_down(23,9,pass);
+			else if(number == 16) add_down(23,39,pass);
+		}
+		else{
+			clear_box();
+			move(20,58); printw("Wrong answer. Try again!");
+			move(LINES-1, COLS-1);
+			refresh();
+			sleep(1);
+		}
+	}
+	pthread_mutex_unlock(&input_lock);
+	flag = 0;
 }
 
 void add_across(int x, int y, char *input){
