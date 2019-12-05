@@ -17,7 +17,7 @@
 #include <sys/ioctl.h>
 
 #define oops(msg) {perror(msg); exit(1);}
-#define HOSTNAME "54.180.7.174"
+#define HOSTNAME "54.180.7.174" // 김주영 aws public IP
 #define PORT 25044
 
 struct info {
@@ -25,38 +25,35 @@ struct info {
 	char input_s[20];
 };
 
-void edge(); // 게임화면  테두리
-void crossword_base();
-void add_blank(int, int, int);
-void clear_box();
+/* pages */
+void first_page();		// 시작화면 + 1p,2p 선택화면
+void info_page();		// 게임설명, 개발자소개 화면
+void select_action_page();	// add, exit 중 선택화면
+void select_across_down_page();	// across, down, submit, exit 중 선택화면
+void add_page1(int);		// 사용자로부터 input 받아옴
+void add_page2(struct info);	// input이 맞으면 퍼즐에 출력
+void add_across(int, int,  char*);	// 퍼즐에 across 단어 출력
+void add_down(int, int,  char*);  	// 퍼즐에 down 단어 출력
+void submit_page();		// 제출
+void exit_page();		// 종료 (tty 복구)
 
-void player1();
-void player2();
-
-void *thread_loop();
-
-void first_page();
-void info_page();
-void select_action_page();
-void select_across_down_page();
-void add_page1(int);
-void add_page2(struct info);
-void add_across(int, int,  char*);
-void add_down(int, int,  char*);
-
-void submit_page();
-void exit_page();
-
-void set_cr_noecho_mode();
-void set_nodelay_mode(void);
+/* functions */
+void edge();			// 게임화면  테두리
+void crossword_base();		// 퍼즐 디자인
+void add_blank(int, int, int);	// 퍼즐의 단어가 없는 부분에 블럭 채워넣기
+void clear_box();		// 답변 박스 지우기
+void player2();			// 서버와 연결, thread 생성
+void *thread_loop();		// 다른 클라이언트가 보낸 메세지를 서버로부터 받아옴
+void set_cr_noecho_mode();	
 void tty_mode(int);
 
-int cnt_across = 0; // total 12
-int cnt_down = 0; // total 10
-int flag = 0; //submit signal
+/* variables */
+int cnt_across = 0;	// total 12
+int cnt_down = 0;	// total 10
+int flag = 0;		// submit signal
+int sock_id;		// client active socket fd
 pthread_t t1;
-int sock_id;
-pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER; // 퍼즐에 단어 추가할 때 lock 
 
 void main(){
 	void ctrl_c(int); // declare the handler
@@ -64,28 +61,27 @@ void main(){
 
 	tty_mode(0); // save original mode
 	set_cr_noecho_mode(); // canonical, echo mode OFF
-	//set_nodelay_mode(); // blocking OFF
 
 	initscr();
 	clear();
 
 	first_page();
 	crossword_base();
-	select_action_page();	
+	select_action_page();
 
-	if(getchar()){
-		endwin();
-		tty_mode(1);
-		return;
-	}
+	if(getchar())
+		exit_page();
 }
 
 void first_page(){
-	char *menu[] = {"             [1] game start             ","             [2] game info              ","             [3] game exit              "};
+	char *menu[] = {"             [1] game start             ",
+		"             [2] game info              ",
+		"             [3] game exit              "};
 	char line[] = "****************************************";
 	char blank[] = "                                        ";
-	char *choose[] = {"                 [1] 1p                 ","                 [2] 2p                 "};
-	int key, cur, dir_r,dir_c,i;
+	char *choose[] = {"                 [1] 1p                 ",
+		"                 [2] 2p                 "};
+	int key, cur, dir_r, dir_c, i;
 
 	if(has_colors())
 		start_color();
@@ -195,8 +191,7 @@ void first_page(){
 	else exit_page();
 
 	clear();
-
-	//이다음 메인에서 게임시작으로 넘어감
+	// 이제 메인에서 게임시작으로 넘어감
 }
 
 void info_page(){
@@ -246,15 +241,13 @@ void info_page(){
 		refresh();
 		sleep(1);
 	}
-
 	attroff(A_BOLD);
 
 	clear();
 	first_page();
 }
 
-void player2()
-{
+void player2(){
 	struct sockaddr_in servadd;
 	struct hostent *hp;
 
@@ -502,7 +495,7 @@ void add_page1(int selection){
 	while(1){
 		clear_box();
 
-		if(cnt_across == 12 && cnt_down == 10){
+		if(cnt_across == 12 && cnt_down == 10){ // 퍼즐 완성 시 submit 페이지를 선택하도록
 			move(20,58); printw("You filled all blanks.");
 			move(21,58); printw("Let's summit now!!");
 			move(LINES-1, COLS-1);
@@ -523,13 +516,7 @@ void add_page1(int selection){
 			if(input[i] == '\n'){
 				input[i] = '\0';
 				break;
-			}
-
-			if(input[i] == 127)
-			{
-				printw("\b \b");
-				fflush(stdout);
-			}
+			}		
 			else
 				i++;
 		}
@@ -545,9 +532,7 @@ void add_page1(int selection){
 		if(number<10) pass = input+2;
 		else pass = input+3;
 
-
 		if((strcmp(across[number],pass) == 0)||(strcmp(down[number],pass)==0)){
-
 			clear_box();
 			move(20,58); printw("Yes! Correct answer!");
 			move(LINES-1, COLS-1);
@@ -561,20 +546,14 @@ void add_page1(int selection){
 			strcpy(data.input_s,input);
 			add_page2(data);
 		}
-		else
-		{
-
+		else{
 			clear_box();
 			move(20,58); printw("Wrong answer. Try again!");
 			move(LINES-1, COLS-1);
 			refresh();
 			sleep(1);
 		}
-
-
 	}
-
-
 }
 
 void add_page2(struct info input){
@@ -606,7 +585,6 @@ void add_page2(struct info input){
 	}
 
 	else{ // Down
-
 		if(cnt_down < 10) cnt_down++; // 10 이상으로 못 올라가게
 
 		// 퍼즐에 단어 추가하는 부분
@@ -647,7 +625,6 @@ void add_down(int x, int y, char *input){
 	move(LINES-1, COLS-1);
 	refresh();
 }
-
 
 void submit_page(){
 	char success[] = "CLEAR! Congratulations!";
@@ -698,13 +675,6 @@ void set_cr_noecho_mode(){ // canonical mode OFF
 	tcsetattr(0, TCSANOW, &ttystate);
 }
 
-void set_nodelay_mode(){ // nonblocking mode
-	int termflags;
-	termflags = fcntl(0, F_GETFL);
-	termflags |= O_NDELAY;
-	fcntl(0, F_SETFL, termflags);
-}
-
 void tty_mode(int how){ // restore original mode
 	static struct termios original_mode;
 	static int original_flags;
@@ -722,4 +692,3 @@ void tty_mode(int how){ // restore original mode
 void ctrl_c(int signum){
 	exit_page();
 }
-
