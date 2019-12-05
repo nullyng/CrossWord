@@ -253,6 +253,7 @@ void info_page(){
 void player2(){
 	struct sockaddr_in servadd;
 	struct hostent *hp;
+	char consig[BUFSIZ];
 
 	clear();
 
@@ -267,6 +268,12 @@ void player2(){
 
 	if(connect(sock_id, (struct sockaddr *)&servadd, sizeof(servadd))!=0)
 		oops("connect");
+
+	read(sock_id,consig,sizeof(consig));
+	move(LINES /2, COLS/2-strlen(consig)/2);
+	printw("%s",consig);
+	refresh();
+	sleep(1);
 
 	pthread_create(&t1,NULL,thread_loop,NULL);
 }
