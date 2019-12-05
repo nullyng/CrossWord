@@ -19,6 +19,7 @@
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174" // 김주영 aws public IP
+//#define HOSTNAME "172.31.39.220"
 #define PORT 25044
 
 struct info {
@@ -45,7 +46,7 @@ void add_blank(int, int, int);	// 퍼즐의 단어가 없는 부분에 블럭 �
 void clear_box();		// 답변 박스 지우기
 void player2();			// 서버와 연결, thread 생성
 void *thread_loop();		// 다른 클라이언트가 보낸 메세지를 서버로부터 받아옴
-void set_cr_noecho_mode();	
+void set_cr_noecho_mode();
 void tty_mode(int);
 
 /* variables */
@@ -484,7 +485,6 @@ void select_across_down_page() {
 }
 
 void add_page1(int selection){
-	int i;
 	char *across[] = {"0 empty", "grill", "2 empty", "3 empty", "dig", "5 empty",  "our", "again", "ant", "dime", "10 empty",  "snow", "12 empty", "13 empty",  "can", "olive", "16 empty", "owl", "tar", "lolly"};
 	char *down[] = {"0 empty", "guard", "IRA", "long", "drain", "get", "6 empty", "7 empty", "8 empty", "9 empty", "minor", "11 empty", "weedy", "roll", "cat", "15 empty", "ill"};
 	char input[20];
@@ -511,16 +511,8 @@ void add_page1(int selection){
 		move(21,58); printw(": ");
 		refresh();
 
-		i = 0;
-		while(1){ // get the input
-			input[i] = getch();
-			if(input[i] == '\n'){
-				input[i] = '\0';
-				break;
-			}		
-			else
-				i++;
-		}
+		getstr(input);
+			
 		clear_box();
 
 		if (strcmp(input, "back") == 0) {
@@ -561,8 +553,10 @@ void add_page1(int selection){
 void add_page2(struct info input){
 	int number;
 	char *pass;
+	int cur_y, cur_x;
 
 	pthread_mutex_lock(&input_lock);
+	getyx(stdscr, cur_y, cur_x);
 
 	number = atoi(input.input_s);
 	if(number < 10)	pass = input.input_s+2;
@@ -601,7 +595,8 @@ void add_page2(struct info input){
 		else if(number == 14) add_down(23,9,pass);
 		else if(number == 16) add_down(23,39,pass);
 	}
-	move(21, 58); printw(": ");
+	//move(21, 58); printw(": ");
+	move(cur_y, cur_x);
 	refresh();
 	pthread_mutex_unlock(&input_lock);
 }
