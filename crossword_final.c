@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 
@@ -532,7 +533,8 @@ void add_page1(int selection){
 		if(number<10) pass = input+2;
 		else pass = input+3;
 
-		if((strcmp(across[number],pass) == 0)||(strcmp(down[number],pass)==0)){
+		if((selection == 1 && (strcmp(across[number],pass) == 0))||(selection == 2 &&(strcmp(down[number],pass)==0)))
+		{
 			clear_box();
 			move(20,58); printw("Yes! Correct answer!");
 			move(LINES-1, COLS-1);
@@ -541,7 +543,7 @@ void add_page1(int selection){
 			if(t1!='\0'){
 				sprintf(sendstr,"%d %s",selection,input);
 				write(sock_id,sendstr,strlen(sendstr)+1);
-			}
+		}
 			data.selection = selection;
 			strcpy(data.input_s,input);
 			add_page2(data);
