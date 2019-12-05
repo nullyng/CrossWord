@@ -14,6 +14,7 @@ int main(int ac, char *av[])
 	struct sockaddr_in serv_addr;
 	int serv_sock, sock_fd1, sock_fd2, value1, value2;
 	char message1[BUFSIZ], message2[BUFSIZ];
+	char successMSG[] = "successfully connected!";
 
 	if(ac != 2)
 	{
@@ -40,7 +41,7 @@ int main(int ac, char *av[])
 	sock_fd2 = accept(serv_sock, NULL, NULL); // 2개가 들어올 때까지 기다림
 	if(sock_fd1 == -1 || sock_fd2 == -1)
 		oops("accept");
-	printf("successfully connected!\n");	
+	printf("%s\n", successMSG);
 	
 	while(1)
 	{
