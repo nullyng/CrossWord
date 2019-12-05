@@ -5,7 +5,6 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <termio.h>
-#include <fcntl.h>
 #include <ctype.h>
 #include <string.h>
 #include <signal.h>
@@ -16,10 +15,10 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174" // 김주영 aws public IP
-//#define HOSTNAME "172.31.39.220"
 #define PORT 25044
 
 struct info {
@@ -58,17 +57,21 @@ pthread_t t1;
 pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER; // 퍼즐에 단어 추가할 때 lock 
 int check_a[20]={0,};
 int check_d[20]={0,};
+struct timeval start_time, end_time;
+
 void main(){
-	void ctrl_c(int); // declare the handler
+	void ctrl_c(int);	// declare the handler
 	signal(SIGINT, ctrl_c); // install the handler
 
-	tty_mode(0); // save original mode
-	set_cr_noecho_mode(); // canonical, echo mode OFF
+	tty_mode(0);		// save original mode
+	set_cr_noecho_mode();	// canonical, echo mode OFF
 
 	initscr();
 	clear();
 
 	first_page();
+
+	gettimeofday(&start_time, NULL); // timer start
 	crossword_base();
 	select_action_page();
 
@@ -93,17 +96,17 @@ void first_page(){
 	attron(COLOR_PAIR(1));
 	attron(A_BOLD);
 	move(6, 48);	printw("+------------------------+");
-	move(7, 48);	printw("|    |    |    |    |    |"); 
-	move(8, 48);	printw("|    |    |   W|    |    |"); 
+	move(7, 48);	printw("|    |    |    |    |    |");
+	move(8, 48);	printw("|    |    |   W|    |    |");
 	move(9, 48);	printw("--------------------------");
 	move(10, 48);	printw("|    |    |    |    |    |"); 
 	move(11, 48);	printw("|   C|   R|   O|   S|   S|"); 
 	move(12, 48);	printw("--------------------------");
-	move(13, 48);	printw("|    |    |    |    |    |"); 
-	move(14, 48);	printw("|    |    |   R|    |    |"); 
+	move(13, 48);	printw("|    |    |    |    |    |");	
+	move(14, 48);	printw("|    |    |   R|    |    |");	
 	move(15, 48);	printw("--------------------------");
-	move(16, 48);	printw("|    |    |    |    |    |"); 
-	move(17, 48);	printw("|    |    |   D|    |    |"); 
+	move(16, 48);	printw("|    |    |    |    |    |");
+	move(17, 48);	printw("|    |    |   D|    |    |");	
 	move(18, 48);	printw("+------------------------+");
 	attroff(COLOR_PAIR(1));
 	attroff(A_BOLD);
@@ -230,9 +233,6 @@ void info_page(){
 		addstr(developers[i]);
 	}
 
-
-	if(has_colors())
-		start_color();
 	init_pair(2,COLOR_RED,COLOR_BLACK);
 
 	for(int i = 8; i > 0; i--){
@@ -275,7 +275,6 @@ void *thread_loop(void){
 	int i;
 	char *temp[3];
 	struct info data;
-	char consig[200];
 
 	while(1)
 	{
@@ -368,7 +367,6 @@ void crossword_base() {
 	}
 	move(30, 56);	printw("*************************************************************");
 	attroff(A_BOLD);
-
 
 	move(LINES - 1, COLS - 1);
 	refresh();
@@ -608,7 +606,7 @@ void add_page2(struct info input){
 		else if(number == 14) add_down(23,9,pass);
 		else if(number == 16) add_down(23,39,pass);
 	}
-	//move(21, 58); printw(": ");
+
 	move(cur_y, cur_x);
 	refresh();
 	pthread_mutex_unlock(&input_lock);
@@ -639,17 +637,37 @@ void add_down(int x, int y, char *input){
 void submit_page(){
 	char success[] = "CLEAR! Congratulations!";
 	char success2[] = "Enter the any key to exit.";
+	char timer[50];
+	double operating_time;
+	int min;
+	int sec;
+
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);
 
 	if(cnt_across == 12 && cnt_down == 10){ // success
+		gettimeofday(&end_time, NULL); // timer end
+		operating_time =
+			(double)(end_time.tv_sec)+(double)(end_time.tv_usec)/1000000.0-
+			(double)(start_time.tv_sec)-(double)(start_time.tv_usec)/1000000.0;
+		
+		min = ((int)operating_time/60);
+		sec = (int)(operating_time-min*60);
+
 		clear();
 		edge();
 
 		attron(A_BOLD);
-		move(16, 61-strlen(success)/2);
+		move(14, 61-strlen(success)/2);
 		addstr(success);
-		move(17, 61-strlen(success2)/2);
+		move(15, 61-strlen(success2)/2);
 		addstr(success2);
+
+		attron(COLOR_PAIR(3));
+		sprintf(timer, "Your elapsed time: %d minutes %d seconds", min, sec);
+		move(17, 61-strlen(timer)/2);
+		addstr(timer);
 		attroff(A_BOLD);
+		attroff(COLOR_PAIR(3));
 
 		move(LINES-1, COLS-1);
 		refresh();
@@ -687,15 +705,12 @@ void set_cr_noecho_mode(){ // canonical mode OFF
 
 void tty_mode(int how){ // restore original mode
 	static struct termios original_mode;
-	static int original_flags;
 
 	if(how == 0){
 		tcgetattr(0, &original_mode);
-		original_flags = fcntl(0, F_GETFL);
 	}
 	else{
 		tcsetattr(0, TCSANOW, &original_mode);
-		original_flags = fcntl(0, F_SETFL, original_flags);
 	}
 }
 
