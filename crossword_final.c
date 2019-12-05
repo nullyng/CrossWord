@@ -81,21 +81,33 @@ void main(){
 }
 
 void first_page(){
-	char title[] = "Cross Word";
-	char *menu[] = {"     [1] game start     ","     [2] game info      ","     [3] game exit      "};
-	char line[] = "************************";
-	char blank[] = "                        ";
-	char *choose[] = {"         [1] 1p         ","         [2] 2p         "};
+	char *menu[] = {"             [1] game start             ","             [2] game info              ","             [3] game exit              "};
+	char line[] = "****************************************";
+	char blank[] = "                                        ";
+	char *choose[] = {"                 [1] 1p                 ","                 [2] 2p                 "};
 	int key, cur, dir_r,dir_c,i;
 
 	if(has_colors())
 		start_color();
-	init_pair(1,COLOR_BLACK,COLOR_YELLOW);
+	init_pair(1,COLOR_YELLOW,COLOR_BLACK);
 
-	move(12,56);
 	attron(COLOR_PAIR(1));
-	addstr(title);
+	attron(A_BOLD);
+	move(6, 48);	printw("+------------------------+");
+	move(7, 48);	printw("|    |    |    |    |    |"); 
+	move(8, 48);	printw("|    |    |   W|    |    |"); 
+	move(9, 48);	printw("--------------------------");
+	move(10, 48);	printw("|    |    |    |    |    |"); 
+	move(11, 48);	printw("|   C|   R|   O|   S|   S|"); 
+	move(12, 48);	printw("--------------------------");
+	move(13, 48);	printw("|    |    |    |    |    |"); 
+	move(14, 48);	printw("|    |    |   R|    |    |"); 
+	move(15, 48);	printw("--------------------------");
+	move(16, 48);	printw("|    |    |    |    |    |"); 
+	move(17, 48);	printw("|    |    |   D|    |    |"); 
+	move(18, 48);	printw("+------------------------+");
 	attroff(COLOR_PAIR(1));
+	attroff(A_BOLD);
 
 	edge();
 
@@ -103,14 +115,14 @@ void first_page(){
 	refresh();
 	sleep(1);
 
-	move(15,49);
+	move(21,41);
 	addstr(line);
-	move(19,49);
+	move(25,41);
 	addstr(line);
 
 	keypad(stdscr,TRUE);
-	dir_r = 16;
-	dir_c = 49;
+	dir_r = 22;
+	dir_c = 41;
 	cur = dir_r;
 
 	while(1){
@@ -142,13 +154,13 @@ void first_page(){
 	if(cur == dir_r+1) info_page();
 
 	else if(cur == dir_r){ // game start
-		move(12,49);
+		move(12,41);
 		addstr(line);
-		move(19,49);
+		move(19,41);
 		addstr(line);
 
-		dir_r -=3;
-		dir_c = 49;
+		dir_r -=9;
+		dir_c = 41;
 		cur = dir_r;
 
 		while(1){
@@ -201,28 +213,41 @@ void info_page(){
 		"2018111138 Baek Hyewon"};
 
 	attron(A_BOLD|A_UNDERLINE);
-	move(10, 61-strlen(info[0])/2);
+	move(9, 61-strlen(info[0])/2);
 	addstr(info[0]);
 	attroff(A_UNDERLINE);
 
 	for(int i = 1; i <= 4; i++){
-		move(11+i, 61-strlen(info[i])/2);
+		move(10+i, 61-strlen(info[i])/2);
 		addstr(info[i]);
 	}
 
 	attron(A_UNDERLINE);
-	move(18, 61-strlen(developers[0])/2);
+	move(17, 61-strlen(developers[0])/2);
 	addstr(developers[0]);
 	attroff(A_UNDERLINE);
 
 	for(int i = 1; i <=3; i++){
-		move(19+i, 61-strlen(developers[i])/2);
+		move(18+i, 61-strlen(developers[i])/2);
 		addstr(developers[i]);
 	}
+
+
+	if(has_colors())
+		start_color();
+	init_pair(2,COLOR_RED,COLOR_BLACK);
+
+	for(int i = 8; i > 0; i--){
+		move(24,61-16);
+		attron(COLOR_PAIR(2));
+		printw("Exit this page after %d seconds...", i);
+		attroff(COLOR_PAIR(2));
+		move(LINES-1, COLS-1);
+		refresh();
+		sleep(1);
+	}
+
 	attroff(A_BOLD);
-	move(LINES-1, COLS-1);
-	refresh();
-	sleep(5);
 
 	clear();
 	first_page();
@@ -527,7 +552,7 @@ void add_page1(int selection){
 			move(20,58); printw("Yes! Correct answer!");
 			move(LINES-1, COLS-1);
 			refresh();
-			//	sleep(1);
+			sleep(1);
 			if(t1!='\0'){
 				sprintf(sendstr,"%d %s",selection,input);
 				write(sock_id,sendstr,strlen(sendstr)+1);
