@@ -18,7 +18,7 @@
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174"
-#define PORT 25043
+#define PORT 25044
 
 struct info {
 	int selection;
@@ -499,7 +499,14 @@ void add_page1(int selection){
 				input[i] = '\0';
 				break;
 			}
-			i++;
+
+			if(input[i] == 127)
+			{
+				printw("\b \b");
+				fflush(stdout);
+			}
+			else
+				i++;
 		}
 		clear_box();
 
@@ -589,6 +596,8 @@ void add_page2(struct info input){
 		else if(number == 14) add_down(23,9,pass);
 		else if(number == 16) add_down(23,39,pass);
 	}
+	move(21, 58); printw(": ");
+	refresh();
 	pthread_mutex_unlock(&input_lock);
 }
 
