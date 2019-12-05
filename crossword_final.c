@@ -19,6 +19,7 @@
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174" // 김주영 aws public IP
+//#define HOSTNAME "172.31.39.220"
 #define PORT 25044
 
 struct info {
@@ -55,7 +56,8 @@ int flag = 0;		// submit signal
 int sock_id;		// client active socket fd
 pthread_t t1;
 pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER; // 퍼즐에 단어 추가할 때 lock 
-
+int check_a[20]={0,};
+int check_d[20]={0,};
 void main(){
 	void ctrl_c(int); // declare the handler
 	signal(SIGINT, ctrl_c); // install the handler
@@ -511,7 +513,7 @@ void add_page1(int selection){
 		refresh();
 
 		getstr(input);
-			
+
 		clear_box();
 
 		if (strcmp(input, "back") == 0) {
@@ -524,25 +526,35 @@ void add_page1(int selection){
 		if(number<10) pass = input+2;
 		else pass = input+3;
 
-		if((selection == 1 && (strcmp(across[number],pass) == 0))||(selection == 2 &&(strcmp(down[number],pass)==0)))
-		{
-			clear_box();
-			move(20,58); printw("Yes! Correct answer!");
-			move(LINES-1, COLS-1);
-			refresh();
-			sleep(1);
-			if(t1!='\0'){
-				sprintf(sendstr,"%d %s",selection,input);
-				write(sock_id,sendstr,strlen(sendstr)+1);
-		}
-			data.selection = selection;
-			strcpy(data.input_s,input);
-			add_page2(data);
+
+		if((selection == 1&& check_a[number] !=1) ||(selection == 2 && check_d[number] != 1)){
+			if((selection == 1 && (strcmp(across[number],pass) == 0))||(selection == 2 &&(strcmp(down[number],pass)==0)))
+			{
+				clear_box();
+				move(20,58); printw("Yes! Correct answer!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+				if(t1!='\0'){
+					sprintf(sendstr,"%d %s",selection,input);
+					write(sock_id,sendstr,strlen(sendstr)+1);
+				}
+				data.selection = selection;
+				strcpy(data.input_s,input);
+				add_page2(data);
+			}
+			else{
+				clear_box();
+				move(20,58); printw("Wrong answer. Try again!");
+				move(LINES-1, COLS-1);
+				refresh();
+				sleep(1);
+			}
 		}
 		else{
 			clear_box();
-			move(20,58); printw("Wrong answer. Try again!");
-			move(LINES-1, COLS-1);
+			move(20,58); printw("Already answered!");
+			move(LINES -1, COLS -1);
 			refresh();
 			sleep(1);
 		}
@@ -562,6 +574,7 @@ void add_page2(struct info input){
 	else pass = input.input_s+3;
 
 	if(input.selection == 1){ // Across
+		check_a[number] =1;
 		if(cnt_across < 12) cnt_across++; // 12 이상으로 못 올라가게
 
 		// 퍼즐에 단어 추가하는 부분
@@ -580,6 +593,7 @@ void add_page2(struct info input){
 	}
 
 	else{ // Down
+		check_d[number] =1;
 		if(cnt_down < 10) cnt_down++; // 10 이상으로 못 올라가게
 
 		// 퍼즐에 단어 추가하는 부분
@@ -594,6 +608,7 @@ void add_page2(struct info input){
 		else if(number == 14) add_down(23,9,pass);
 		else if(number == 16) add_down(23,39,pass);
 	}
+	//move(21, 58); printw(": ");
 	move(cur_y, cur_x);
 	refresh();
 	pthread_mutex_unlock(&input_lock);
