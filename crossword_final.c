@@ -19,7 +19,6 @@
 
 #define oops(msg) {perror(msg); exit(1);}
 #define HOSTNAME "54.180.7.174" // 김주영 aws public IP
-//#define HOSTNAME "172.31.39.220"
 #define PORT 25044
 
 struct info {
@@ -595,7 +594,6 @@ void add_page2(struct info input){
 		else if(number == 14) add_down(23,9,pass);
 		else if(number == 16) add_down(23,39,pass);
 	}
-	//move(21, 58); printw(": ");
 	move(cur_y, cur_x);
 	refresh();
 	pthread_mutex_unlock(&input_lock);
